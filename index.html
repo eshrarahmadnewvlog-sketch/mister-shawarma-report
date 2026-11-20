@@ -2,580 +2,1313 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <title>Mister Shawarma - Pro Ledger</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mister Shawarma - Sales Report & Expense Tracker</title>
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js for Interactive Analytics -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              yellow: '#FACC15',
+              yellowHover: '#EAB308',
+              dark: '#0F172A',
+              card: '#1E293B',
+              border: '#334155',
+            }
+          }
+        }
+      }
+    }
+  </script>
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #090d16; color: #f8fafc; }
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    /* Custom scrollbar for sleek mobile/desktop feel */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0F172A;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+    .wa-bg {
+      background-color: #0b141a;
+      background-image: radial-gradient(#1f2c34 1px, transparent 1px);
+      background-size: 16px 16px;
+    }
   </style>
 </head>
-<body class="pb-24 max-w-lg mx-auto">
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen pb-20">
 
-  <header class="sticky top-0 z-30 bg-[#0d1320]/95 backdrop-blur border-b border-slate-800 px-3.5 py-3 flex items-center justify-between gap-2">
-    <div class="flex items-center gap-2.5">
-      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-300 to-amber-500 text-slate-950 font-black flex items-center justify-center text-xl shadow-lg">🌯</div>
-      <div>
-        <div class="flex items-center gap-1.5">
-          <h1 class="text-sm font-extrabold text-white leading-tight">Mister Shawarma</h1>
-          <span class="bg-amber-500/15 border border-amber-400/40 text-amber-300 text-[9px] font-extrabold px-1.5 py-0.5 rounded-md">PRO LEDGER</span>
-        </div>
-        <p class="text-[11px] text-slate-400 leading-tight mt-0.5">🔒 Protected Sales & Expense App</p>
-      </div>
-    </div>
-    <div class="flex items-center gap-1.5">
-      <button type="button" id="btnOpenPaste" class="bg-slate-800 border border-slate-700 text-amber-300 text-[11px] font-bold px-2.5 py-2 rounded-xl active:scale-95">📋 Paste WA</button>
-      <button type="button" id="btnResetForm" class="bg-slate-800 border border-slate-700 text-slate-300 text-xs px-2.5 py-2 rounded-xl active:scale-95">↺</button>
-    </div>
-  </header>
-
-  <section class="px-3.5 pt-3.5 grid grid-cols-2 gap-2.5" id="kpiCards"></section>
-
-  <nav class="px-3.5 pt-3.5 flex gap-2 border-b border-slate-800/80 pb-3 overflow-x-auto no-scrollbar">
-    <button type="button" id="tab-entry" class="bg-yellow-400 text-slate-950 font-extrabold text-xs px-3.5 py-2 rounded-xl whitespace-nowrap shadow">📝 New Report</button>
-    <button type="button" id="tab-charts" class="bg-[#131b2e] border border-slate-800 text-slate-300 font-semibold text-xs px-3.5 py-2 rounded-xl whitespace-nowrap">📊 Charts & Audit</button>
-    <button type="button" id="tab-ledger" class="bg-[#131b2e] border border-slate-800 text-slate-300 font-semibold text-xs px-3.5 py-2 rounded-xl whitespace-nowrap">📒 All Reports (<span id="reportCount">0</span>)</button>
-  </nav>
-
-  <!-- TAB 1: NEW REPORT -->
-  <main id="view-entry" class="p-3.5 space-y-4">
-    <div class="bg-[#111827] border border-slate-800 rounded-2xl p-3.5 space-y-3">
-      <div class="flex items-center justify-between">
-        <h2 class="text-xs font-extrabold text-yellow-400 uppercase">1. Daily Sales (Bikri)</h2>
-        <span id="liveRevBadge" class="text-xs font-bold text-emerald-400">Total: ₹0</span>
-      </div>
-      <div class="grid grid-cols-2 gap-2.5">
-        <div>
-          <label class="text-[11px] text-slate-400 block mb-1">Date (DD/MM/YYYY)</label>
-          <input id="inDate" type="text" class="w-full bg-[#0b101b] border border-slate-700 rounded-xl px-3 py-2 text-sm text-white outline-none" />
-        </div>
-        <div>
-          <label class="text-[11px] text-slate-400 block mb-1">Staff / Sender</label>
-          <input id="inSender" type="text" value="Rजे" class="w-full bg-[#0b101b] border border-slate-700 rounded-xl px-3 py-2 text-sm text-white outline-none" />
-        </div>
-      </div>
-      <div class="grid grid-cols-2 gap-2.5">
-        <div>
-          <label class="text-[11px] text-slate-400 block mb-1">Cash (₹)</label>
-          <input id="inCash" type="number" inputmode="numeric" placeholder="0" class="w-full bg-[#0b101b] border border-slate-700 rounded-xl px-3 py-2 text-sm text-white outline-none" />
-        </div>
-        <div>
-          <label class="text-[11px] text-slate-400 block mb-1">UPI (₹)</label>
-          <input id="inUpi" type="number" inputmode="numeric" placeholder="0" class="w-full bg-[#0b101b] border border-slate-700 rounded-xl px-3 py-2 text-sm text-white outline-none" />
-        </div>
-        <div>
-          <label class="text-[11px] text-slate-400 block mb-1">Zomato (₹)</label>
-          <input id="inZomato" type="number" inputmode="numeric" value="0" class="w-full bg-[#0b101b] border border-slate-700 rounded-xl px-3 py-2 text-sm text-white outline-none" />
-        </div>
-        <div>
-          <label class="text-[11px] text-slate-400 block mb-1">Swiggy (₹)</label>
-          <input id="inSwiggy" type="number" inputmode="numeric" value="0" class="w-full bg-[#0b101b] border border-slate-700 rounded-xl px-3 py-2 text-sm text-white outline-none" />
-        </div>
-      </div>
-    </div>
-
-    <div class="bg-[#111827] border border-slate-800 rounded-2xl p-3.5 space-y-3">
-      <div class="flex items-center justify-between gap-1.5">
-        <h2 class="text-xs font-extrabold text-rose-400 uppercase leading-tight">2. Daily Expenses<br/>(Kharcha)</h2>
-        <div class="flex items-center gap-1.5">
-          <button type="button" id="btnAdd1050" class="bg-slate-800 border border-slate-700 text-slate-200 text-xs font-bold px-2.5 py-1.5 rounded-xl active:scale-95">+1050</button>
-          <button type="button" id="btnAdd1000" class="bg-slate-800 border border-slate-700 text-slate-200 text-xs font-bold px-2.5 py-1.5 rounded-xl active:scale-95">+1000</button>
-          <button type="button" id="btnAddItem" class="bg-rose-500/20 border border-rose-500/40 text-rose-300 text-xs font-bold px-2.5 py-1.5 rounded-xl active:scale-95">+ Add Item</button>
-        </div>
-      </div>
-      <div id="expenseRowsContainer" class="space-y-2"></div>
-      <div class="bg-[#0b101b] border border-slate-800 rounded-xl px-3 py-2.5 flex items-center justify-between text-xs">
-        <span class="text-slate-400 truncate max-w-[58%]">Formula: <strong id="expFormulaText" class="text-slate-200 font-mono">0</strong></span>
-        <span class="text-rose-400 font-extrabold">Total Expense: <span id="expTotalText">₹0</span></span>
-      </div>
-    </div>
-
-    <div class="bg-[#111827] border border-slate-800 rounded-2xl p-3.5 space-y-3">
-      <div class="flex items-center justify-between">
-        <h2 class="text-xs font-extrabold text-sky-400 uppercase">3. Chicken Stock & Net</h2>
-        <span id="liveNetBadge" class="text-xs font-extrabold text-yellow-400">Net Profit: ₹0</span>
-      </div>
-      <div class="grid grid-cols-3 gap-2.5">
-        <div>
-          <label class="text-[11px] text-slate-400 block mb-1">Chicken Sold (kg)</label>
-          <input id="inChickenSold" type="number" inputmode="numeric" value="14" class="w-full bg-[#0b101b] border border-slate-700 rounded-xl px-3 py-2 text-sm text-white outline-none" />
-        </div>
-        <div>
-          <label class="text-[11px] text-slate-400 block mb-1">Chicken Left (kg)</label>
-          <input id="inChickenLeft" type="number" inputmode="numeric" value="0" class="w-full bg-[#0b101b] border border-slate-700 rounded-xl px-3 py-2 text-sm text-white outline-none" />
-        </div>
-        <div>
-          <label class="text-[11px] text-slate-400 block mb-1">Average</label>
-          <input id="inAvg" type="text" readonly class="w-full bg-[#0b101b]/70 border border-slate-800 rounded-xl px-3 py-2 text-sm text-yellow-400 font-bold outline-none" />
-        </div>
-      </div>
-      <button type="button" id="btnSaveReport" class="w-full bg-yellow-400 text-slate-950 font-extrabold py-3 rounded-xl text-sm shadow-lg active:scale-95">Save Report in App</button>
-    </div>
-
-    <div class="bg-[#111827] border border-emerald-500/30 rounded-2xl p-3.5 space-y-3">
-      <div class="flex items-center justify-between">
-        <span class="text-xs font-bold text-emerald-400">WhatsApp Format Preview</span>
-        <div class="flex gap-2">
-          <button type="button" id="btnCopyWA" class="bg-slate-800 text-white text-xs px-3 py-1.5 rounded-lg font-semibold active:scale-95">Copy</button>
-          <button type="button" id="btnShareWA" class="bg-emerald-500 text-slate-950 text-xs px-3 py-1.5 rounded-lg font-extrabold active:scale-95">WhatsApp</button>
-        </div>
-      </div>
-      <pre id="waPreview" class="bg-[#0b101b] border border-slate-800 rounded-xl p-3 text-xs text-slate-200 whitespace-pre-wrap font-mono leading-relaxed"></pre>
-    </div>
-  </main>
-
-  <!-- TAB 2: CHARTS -->
-  <section id="view-charts" class="hidden p-3.5 space-y-4">
-    <div class="bg-[#111827] border border-slate-800 rounded-2xl p-3.5">
-      <div class="flex items-center justify-between mb-3">
-        <h2 class="text-sm font-bold text-yellow-400">Daily Revenue vs Expense vs Net</h2>
-        <select id="chartMode" class="bg-[#0b101b] border border-slate-700 text-xs rounded-lg px-2 py-1 text-white">
-          <option value="profit">Profitability</option>
-          <option value="payment">Cash vs UPI</option>
-        </select>
-      </div>
-      <div class="h-64"><canvas id="salesChart"></canvas></div>
-    </div>
-    <div class="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-3.5 space-y-2">
-      <h3 class="text-xs font-bold text-amber-400 uppercase">Audit & Calculation Alerts</h3>
-      <ul class="text-xs text-slate-300 space-y-1.5 list-disc pl-4">
-        <li><strong>17/11/2026 (+₹30 Under-reported):</strong> Cash ₹2,750 + UPI ₹7,054 = <strong>₹9,804</strong> (likha gaya ₹9,774).</li>
-        <li><strong>3/11/2026 (-₹1 Rounding):</strong> Cash ₹2,740 + UPI ₹5,849 = <strong>₹8,589</strong> (likha gaya ₹8,590).</li>
-        <li><strong>Duplicate Date (11/11/2026):</strong> Do reports par 11/11/2026 likha hai (ek ₹8,560 aur doosri ₹9,088).</li>
-      </ul>
-    </div>
-  </section>
-
-  <!-- TAB 3: LEDGER -->
-  <section id="view-ledger" class="hidden p-3.5 space-y-3">
-    <div class="flex items-center justify-between">
-      <h2 class="text-sm font-bold text-yellow-400">All Saved Reports</h2>
-      <button type="button" id="btnResetNovData" class="text-[11px] text-rose-400 underline font-semibold">🔒 Reset Nov Data</button>
-    </div>
-    <div id="ledgerList" class="space-y-2.5"></div>
-  </section>
-
-  <!-- PASTE WA MODAL -->
-  <div id="pasteModal" class="hidden fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-    <div class="bg-[#111827] border border-slate-700 rounded-2xl w-full max-w-md p-4 space-y-3">
-      <div class="flex justify-between items-center">
-        <h3 class="text-sm font-bold text-yellow-400">Paste WhatsApp Sales Report</h3>
-        <button type="button" id="btnClosePaste" class="text-slate-400 text-xl font-bold">&times;</button>
-      </div>
-      <textarea id="waPasteInput" rows="7" placeholder="WhatsApp Sales Report paste karein..." class="w-full bg-[#0b101b] border border-slate-700 rounded-xl p-3 text-xs text-white outline-none"></textarea>
-      <button type="button" id="btnImportWA" class="w-full bg-emerald-500 text-slate-950 font-extrabold py-2.5 rounded-xl text-xs">Import & Calculate</button>
+  <!-- Toast Notification (No alert() used anywhere) -->
+  <div id="toast" class="fixed top-4 right-4 z-50 transform transition-all duration-300 translate-y-[-150%] opacity-0 pointer-events-none">
+    <div class="bg-yellow-400 text-slate-950 font-bold px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 border border-yellow-300">
+      <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+      </svg>
+      <span id="toast-msg" class="text-sm">Copied!</span>
     </div>
   </div>
 
-  <!-- ADMIN LOCK MODAL -->
-  <div id="authModal" class="hidden fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4">
-    <div class="bg-[#111827] border-2 border-rose-500/60 rounded-2xl w-full max-w-sm p-4 space-y-3 shadow-2xl">
-      <div class="flex justify-between items-center">
-        <h3 class="text-sm font-extrabold text-rose-400">🔒 Admin Lock Active</h3>
-        <button type="button" id="btnCloseAuth" class="text-slate-400 text-xl font-bold">&times;</button>
-      </div>
-      <p id="authModalDesc" class="text-xs text-slate-300">Report delete karne ke liye Admin Number aur Password dalein:</p>
-      <div class="space-y-2.5">
-        <div>
-          <label class="text-[11px] text-slate-400 block mb-1">Admin Mobile Number</label>
-          <input id="authPhoneInput" type="tel" inputmode="numeric" placeholder="Enter mobile number" class="w-full bg-[#0b101b] border border-slate-700 rounded-xl px-3 py-2 text-sm text-white outline-none" />
+  <!-- Top Header -->
+  <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-30 shadow-lg">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-yellow-400 text-slate-950 flex items-center justify-center font-extrabold text-xl shadow-md shadow-yellow-400/20">
+          🌯
         </div>
         <div>
-          <label class="text-[11px] text-slate-400 block mb-1">Admin Password</label>
-          <input id="authPassInput" type="password" placeholder="Enter password" class="w-full bg-[#0b101b] border border-slate-700 rounded-xl px-3 py-2 text-sm text-white outline-none" />
+          <div class="flex items-center gap-2">
+            <h1 class="font-extrabold text-base sm:text-lg tracking-tight text-white">Mister Shawarma</h1>
+            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-yellow-400/15 text-yellow-400 border border-yellow-400/30">Pro Ledger</span>
+          </div>
+          <p class="text-xs text-slate-400">Daily Sales, Expense & WhatsApp Report</p>
         </div>
       </div>
-      <p id="authErrorMsg" class="hidden text-xs font-bold text-rose-400 bg-rose-500/15 border border-rose-500/40 rounded-lg px-2.5 py-2">❌ Galat Number ya Password! Delete nahi hoga.</p>
-      <div class="grid grid-cols-2 gap-2 pt-1">
-        <button type="button" id="btnCancelAuth" class="bg-slate-800 text-slate-200 font-bold py-2.5 rounded-xl text-xs">Cancel</button>
-        <button type="button" id="btnConfirmAuth" class="bg-rose-600 text-white font-extrabold py-2.5 rounded-xl text-xs">Verify & Delete</button>
+
+      <div class="flex items-center gap-2">
+        <button onclick="openBulkModal()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-yellow-400 border border-slate-700 transition flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+          </svg>
+          <span class="hidden sm:inline">Paste WA Chat</span>
+          <span class="sm:hidden">Paste WA</span>
+        </button>
+        <button onclick="resetToNovDefault()" title="Reset to original 18 Nov reports" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-6xl mx-auto px-4 pt-4 space-y-5">
+
+    <!-- Top KPI Summary Dashboard -->
+    <section aria-label="Financial Summary KPIs">
+      <div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
+        <!-- Total Revenue -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 shadow-sm">
+          <div class="flex items-center justify-between text-xs text-slate-400 font-medium">
+            <span>Total Revenue</span>
+            <span class="text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded-md font-semibold" id="kpi-days-badge">18 Days</span>
+          </div>
+          <div class="text-xl sm:text-2xl font-extrabold text-white mt-1" id="kpi-revenue">₹1,57,041</div>
+          <div class="text-[11px] text-slate-400 mt-1">Avg <span class="text-slate-200 font-semibold" id="kpi-avg-rev">₹8,725</span>/day</div>
+        </div>
+
+        <!-- Total Expense -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 shadow-sm">
+          <div class="flex items-center justify-between text-xs text-slate-400 font-medium">
+            <span>Total Expense</span>
+            <span class="text-rose-400 bg-rose-500/10 px-1.5 py-0.5 rounded-md font-semibold" id="kpi-exp-pct">66.1%</span>
+          </div>
+          <div class="text-xl sm:text-2xl font-extrabold text-rose-400 mt-1" id="kpi-expense">₹1,03,850</div>
+          <div class="text-[11px] text-slate-400 mt-1">Avg <span class="text-slate-200 font-semibold" id="kpi-avg-exp">₹5,769</span>/day</div>
+        </div>
+
+        <!-- Net Profit -->
+        <div class="bg-gradient-to-br from-yellow-400/15 via-slate-900 to-slate-900 border border-yellow-400/40 rounded-2xl p-3.5 shadow-sm col-span-2 sm:col-span-1">
+          <div class="flex items-center justify-between text-xs text-yellow-300 font-semibold">
+            <span>Net Profit (Bachat)</span>
+            <span class="bg-yellow-400 text-slate-950 px-1.5 py-0.5 rounded-md font-extrabold" id="kpi-margin">33.9%</span>
+          </div>
+          <div class="text-2xl font-extrabold text-yellow-400 mt-1" id="kpi-profit">₹53,191</div>
+          <div class="text-[11px] text-slate-300 mt-1">Avg <span class="text-yellow-300 font-bold" id="kpi-avg-profit">₹2,955</span>/day</div>
+        </div>
+
+        <!-- Payment Split -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 shadow-sm">
+          <div class="flex items-center justify-between text-xs text-slate-400 font-medium">
+            <span>UPI vs Cash</span>
+            <span class="text-sky-400 font-semibold" id="kpi-upi-pct">69.4% UPI</span>
+          </div>
+          <div class="mt-1.5 space-y-1">
+            <div class="flex justify-between text-xs">
+              <span class="text-sky-400 font-semibold">UPI:</span>
+              <span class="font-bold text-white" id="kpi-upi">₹1,09,061</span>
+            </div>
+            <div class="flex justify-between text-xs">
+              <span class="text-emerald-400 font-semibold">Cash:</span>
+              <span class="font-bold text-white" id="kpi-cash">₹47,980</span>
+            </div>
+          </div>
+          <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden mt-2 flex">
+            <div id="kpi-upi-bar" class="bg-sky-400 h-full" style="width: 69.4%"></div>
+            <div id="kpi-cash-bar" class="bg-emerald-400 h-full" style="width: 30.6%"></div>
+          </div>
+        </div>
+
+        <!-- Chicken Sold -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 shadow-sm">
+          <div class="flex items-center justify-between text-xs text-slate-400 font-medium">
+            <span>Chicken Sold</span>
+            <span class="text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded-md font-semibold" id="kpi-sellthrough">100% Sold</span>
+          </div>
+          <div class="text-xl sm:text-2xl font-extrabold text-white mt-1"><span id="kpi-chicken">239</span> <span class="text-sm font-semibold text-slate-400">kg</span></div>
+          <div class="text-[11px] text-slate-400 mt-1">Rev <span class="text-slate-200 font-semibold" id="kpi-rev-kg">₹657</span>/kg • Net <span class="text-emerald-400 font-semibold" id="kpi-net-kg">₹223</span>/kg</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Navigation Tabs -->
+    <nav class="bg-slate-900 p-1.5 rounded-2xl border border-slate-800 grid grid-cols-3 gap-1.5 sticky top-[65px] z-20 shadow-md">
+      <button onclick="switchTab('entry')" id="tab-btn-entry" class="tab-btn py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 bg-yellow-400 text-slate-950 shadow">
+        <span>✍️</span>
+        <span>Naya Report</span>
+      </button>
+      <button onclick="switchTab('charts')" id="tab-btn-charts" class="tab-btn py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-800">
+        <span>📊</span>
+        <span>Charts & Audit</span>
+      </button>
+      <button onclick="switchTab('ledger')" id="tab-btn-ledger" class="tab-btn py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-800">
+        <span>📒</span>
+        <span>All Reports (<span id="tab-count">18</span>)</span>
+      </button>
+    </nav>
+
+    <!-- ========================================================= -->
+    <!-- TAB 1: NAYA REPORT / ENTRY & WHATSAPP GENERATOR           -->
+    <!-- ========================================================= -->
+    <section id="tab-entry" class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+      <!-- Left: Form Inputs -->
+      <div class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div>
+            <h2 class="text-base sm:text-lg font-extrabold text-white" id="form-title">Naya Daily Sales Report</h2>
+            <p class="text-xs text-slate-400">Numbers bhariye, WhatsApp report apne aap ban jayega</p>
+          </div>
+          <button type="button" onclick="clearForm()" class="text-xs font-semibold text-slate-400 hover:text-yellow-400 px-2.5 py-1.5 rounded-lg bg-slate-800">
+            Clear Form
+          </button>
+        </div>
+
+        <input type="hidden" id="edit-id" value="" />
+
+        <!-- Date & Reporter -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Date (Tarikh)</label>
+            <input type="date" id="inp-date" oninput="updateLivePreview()" class="w-full bg-slate-950 border border-slate-700 focus:border-yellow-400 rounded-xl px-3 py-2.5 text-sm text-white outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Reporter Name</label>
+            <select id="inp-reporter" onchange="updateLivePreview()" class="w-full bg-slate-950 border border-slate-700 focus:border-yellow-400 rounded-xl px-3 py-2.5 text-sm text-white outline-none">
+              <option value="Rजे">Rजे</option>
+              <option value="Azad M">Azad M</option>
+              <option value="Counter Staff">Counter Staff</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Sales Collections -->
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-yellow-400 mb-2">1. Sales Collection (Aamdani)</label>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Cash (₹)</label>
+              <input type="number" id="inp-cash" placeholder="0" min="0" oninput="updateLivePreview()" class="w-full bg-slate-950 border border-slate-700 focus:border-emerald-400 rounded-xl px-3 py-2.5 text-sm font-bold text-emerald-400 outline-none" />
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">UPI (₹)</label>
+              <input type="number" id="inp-upi" placeholder="0" min="0" oninput="updateLivePreview()" class="w-full bg-slate-950 border border-slate-700 focus:border-sky-400 rounded-xl px-3 py-2.5 text-sm font-bold text-sky-400 outline-none" />
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Zomato (₹)</label>
+              <input type="number" id="inp-zomato" value="0" min="0" oninput="updateLivePreview()" class="w-full bg-slate-950 border border-slate-700 focus:border-rose-400 rounded-xl px-3 py-2.5 text-sm font-semibold text-white outline-none" />
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Swiggy (₹)</label>
+              <input type="number" id="inp-swiggy" value="0" min="0" oninput="updateLivePreview()" class="w-full bg-slate-950 border border-slate-700 focus:border-amber-400 rounded-xl px-3 py-2.5 text-sm font-semibold text-white outline-none" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Dynamic Expense Items -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <label class="text-xs font-bold uppercase tracking-wider text-rose-400">2. Daily Expenses (Kharcha)</label>
+            <div class="flex items-center gap-1.5">
+              <button type="button" onclick="addExpenseRow(1050, 'Fixed 1')" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded-lg border border-slate-700">+1050</button>
+              <button type="button" onclick="addExpenseRow(1000, 'Fixed 2')" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded-lg border border-slate-700">+1000</button>
+              <button type="button" onclick="addExpenseRow('', '')" class="text-xs bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-bold px-2.5 py-1 rounded-lg border border-rose-500/30">+ Add Item</button>
+            </div>
+          </div>
+
+          <div id="expense-rows-container" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+            <!-- Dynamic rows injected via JS -->
+          </div>
+
+          <div class="mt-2 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 flex items-center justify-between text-xs">
+            <span class="text-slate-400">Formula: <span id="exp-formula-preview" class="font-mono text-slate-300">0</span></span>
+            <span class="font-bold text-rose-400">Total Expense: ₹<span id="exp-total-preview">0</span></span>
+          </div>
+        </div>
+
+        <!-- Chicken Stock -->
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-amber-400 mb-2">3. Chicken Stock (kg)</label>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Chicken Sold (kg)</label>
+              <input type="number" id="inp-chicken-sold" placeholder="14" step="0.5" min="0" oninput="updateLivePreview()" class="w-full bg-slate-950 border border-slate-700 focus:border-yellow-400 rounded-xl px-3 py-2.5 text-sm font-bold text-white outline-none" />
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Chicken Left (kg)</label>
+              <input type="number" id="inp-chicken-left" value="0" step="0.5" min="0" oninput="updateLivePreview()" class="w-full bg-slate-950 border border-slate-700 focus:border-yellow-400 rounded-xl px-3 py-2.5 text-sm font-bold text-white outline-none" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Summary Strip -->
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3.5 grid grid-cols-3 gap-2 text-center">
+          <div>
+            <div class="text-[11px] text-slate-400">Total Sale</div>
+            <div class="text-base sm:text-lg font-extrabold text-white" id="calc-total-sale">₹0</div>
+          </div>
+          <div class="border-x border-slate-800">
+            <div class="text-[11px] text-slate-400">Total Kharcha</div>
+            <div class="text-base sm:text-lg font-extrabold text-rose-400" id="calc-total-exp">₹0</div>
+          </div>
+          <div>
+            <div class="text-[11px] text-slate-400">Net Bachat</div>
+            <div class="text-base sm:text-lg font-extrabold text-yellow-400" id="calc-net-profit">₹0</div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+          <button type="button" onclick="saveReport()" class="w-full py-3.5 px-4 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-extrabold text-sm shadow-lg shadow-yellow-400/20 transition flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span id="save-btn-text">Save to Ledger</span>
+          </button>
+          <button type="button" onclick="shareOnWhatsApp()" class="w-full py-3.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-sm shadow-lg shadow-emerald-500/20 transition flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824z"/>
+            </svg>
+            <span>Share on WhatsApp</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Right: Live WhatsApp Preview Box -->
+      <div class="lg:col-span-5 flex flex-col">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 flex-1 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <h3 class="text-sm font-extrabold text-white">Live WhatsApp Format Preview</h3>
+              </div>
+              <button type="button" onclick="copyWhatsAppText()" class="text-xs font-bold bg-slate-800 hover:bg-slate-700 text-yellow-400 px-3 py-1.5 rounded-lg border border-slate-700 transition">
+                Copy Text
+              </button>
+            </div>
+
+            <!-- WhatsApp Chat Bubble -->
+            <div class="wa-bg rounded-2xl p-4 border border-slate-800 shadow-inner">
+              <div class="bg-[#005c4b] text-[#e9edef] rounded-2xl rounded-tr-none p-4 shadow-md max-w-full overflow-x-auto">
+                <pre id="whatsapp-preview-box" class="font-mono text-xs sm:text-[13px] leading-relaxed whitespace-pre-wrap select-all"></pre>
+                <div class="text-[10px] text-emerald-200/70 text-right mt-2 flex items-center justify-end gap-1">
+                  <span id="wa-time-stamp">11:30 AM</span>
+                  <span>✓✓</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs text-slate-400 space-y-1">
+            <div class="font-semibold text-slate-200">💡 Auto-Calculation Active:</div>
+            <p>• Cash + UPI + Zomato + Swiggy automatically total hota hai (3/11 aur 17/11 jaisi calculation mistake ab nahi hogi).</p>
+            <p>• Average (Rev/kg) automatic calculate hokar niche dikhega.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- TAB 2: INTERACTIVE CHARTS & SMART AUDIT                   -->
+    <!-- ========================================================= -->
+    <section id="tab-charts" class="hidden space-y-5">
+      <!-- Smart Insights & Audit Alerts -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-slate-900 border border-emerald-500/30 rounded-2xl p-4">
+          <div class="flex items-center gap-2 text-emerald-400 font-extrabold text-sm mb-1.5">
+            <span>🍗</span>
+            <span>100% Sell-Through Opportunity</span>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Sabhi 18 din <strong class="text-white">0 kg chicken left</strong> raha (239 kg sold). 15 kg wale din ₹9,870 avg sale hui vs ₹7,885 (12 kg days). Peak days par <strong class="text-emerald-400">16–17 kg</strong> stock test karne se ₹450–₹670 extra daily profit ho sakta hai.
+          </p>
+        </div>
+
+        <div class="bg-slate-900 border border-rose-500/30 rounded-2xl p-4">
+          <div class="flex items-center gap-2 text-rose-400 font-extrabold text-sm mb-1.5">
+            <span>⚠️</span>
+            <span>Expense Spike & Fixed Costs</span>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            <strong class="text-white">18/11/2026</strong> ko kharcha <strong class="text-rose-400">₹7,355</strong> (+27.5% above avg) pahunch gaya (₹3,150 + ₹540 + ₹400 items). Rozana <strong class="text-yellow-400">₹1,050</strong> (17/18 din) aur <strong class="text-yellow-400">₹1,000</strong> (13/18 din) fixed recurring kharche hain.
+          </p>
+        </div>
+
+        <div class="bg-slate-900 border border-yellow-400/30 rounded-2xl p-4">
+          <div class="flex items-center gap-2 text-yellow-400 font-extrabold text-sm mb-1.5">
+            <span>🔍</span>
+            <span>Bookkeeping Audit Fixed</span>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            • <strong class="text-white">3/11/2026:</strong> 2740+5849 = ₹8,589 (Report me ₹8,590 likha tha).<br/>
+            • <strong class="text-white">17/11/2026:</strong> 2750+7054 = ₹9,804 (Report me ₹9,774 likha tha, ₹30 under-reported).<br/>
+            • <strong class="text-white">11/11 Dup:</strong> 13 Nov ko bheja gaya 11/11 report (14 kg) asal me 12/11/2026 ka hai.
+          </p>
+        </div>
+      </div>
+
+      <!-- Main Daily Chart -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+          <div>
+            <h3 class="text-base font-extrabold text-white">Daily Revenue, Expense & Net Profit</h3>
+            <p class="text-xs text-slate-400">November 2026 day-by-day financial performance</p>
+          </div>
+          <div class="flex items-center gap-2 text-xs">
+            <span class="inline-flex items-center gap-1 text-sky-400"><span class="w-2.5 h-2.5 rounded-sm bg-sky-400"></span> Revenue</span>
+            <span class="inline-flex items-center gap-1 text-rose-400"><span class="w-2.5 h-2.5 rounded-sm bg-rose-400"></span> Expense</span>
+            <span class="inline-flex items-center gap-1 text-yellow-400"><span class="w-2.5 h-2.5 rounded-sm bg-yellow-400"></span> Net Profit</span>
+          </div>
+        </div>
+        <div class="relative h-72 sm:h-80 w-full">
+          <canvas id="dailyChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Secondary Charts Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <!-- Payment Mode Split -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5">
+          <h3 class="text-base font-extrabold text-white mb-1">Payment Mode Split (UPI vs Cash)</h3>
+          <p class="text-xs text-slate-400 mb-4">69.4% digital UPI collections vs 30.6% Cash</p>
+          <div class="relative h-64 w-full flex items-center justify-center">
+            <canvas id="paymentChart"></canvas>
+          </div>
+        </div>
+
+        <!-- First 9 vs Last 9 Days Comparison -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5">
+          <h3 class="text-base font-extrabold text-white mb-1">First 9 Days vs Last 9 Days Avg</h3>
+          <p class="text-xs text-slate-400 mb-4">Revenue +10.1% badha, par Expense +16.1% badhne se Net Profit flat raha</p>
+          <div class="relative h-64 w-full">
+            <canvas id="halfComparisonChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- TAB 3: ALL REPORTS / FULL LEDGER                          -->
+    <!-- ========================================================= -->
+    <section id="tab-ledger" class="hidden space-y-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h2 class="text-base sm:text-lg font-extrabold text-white">Complete Sales & Expense Ledger</h2>
+          <p class="text-xs text-slate-400">Kisi bhi din par click karke kharche ka breakdown dekhein ya WhatsApp copy karein</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="text" id="ledger-search" oninput="renderLedger()" placeholder="Search date (e.g. 18/11)..." class="w-full sm:w-56 bg-slate-950 border border-slate-700 focus:border-yellow-400 rounded-xl px-3 py-2 text-xs text-white outline-none" />
+          <button onclick="openBulkModal()" class="shrink-0 px-3 py-2 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-bold text-xs transition">
+            + Paste WA
+          </button>
+        </div>
+      </div>
+
+      <!-- Responsive Table / Cards -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-950/90 border-b border-slate-800 text-[11px] uppercase tracking-wider text-slate-400">
+                <th class="py-3 px-3.5">Date</th>
+                <th class="py-3 px-3">Cash</th>
+                <th class="py-3 px-3">UPI</th>
+                <th class="py-3 px-3">Revenue</th>
+                <th class="py-3 px-3">Expense</th>
+                <th class="py-3 px-3">Net Profit</th>
+                <th class="py-3 px-3">Chicken</th>
+                <th class="py-3 px-3.5 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="ledger-tbody" class="divide-y divide-slate-800/80 text-xs sm:text-sm">
+              <!-- Rows injected by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================= -->
+  <!-- MODAL: WHATSAPP BULK PASTE IMPORTER                       -->
+  <!-- ========================================================= -->
+  <div id="bulk-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-5 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div>
+          <h3 class="text-base font-extrabold text-white">Paste WhatsApp Sales Report(s)</h3>
+          <p class="text-xs text-slate-400">WhatsApp se copy kiya hua ek ya multiple messages yahan paste karein</p>
+        </div>
+        <button onclick="closeBulkModal()" class="text-slate-400 hover:text-white p-1.5 rounded-lg bg-slate-800">✕</button>
+      </div>
+
+      <textarea id="bulk-wa-input" rows="8" placeholder="[21/11/26, 10:30:00 AM] Rजे : Sales Report
+ 
+Date       20/ 11/ 2026
+
+Cash              2900₹        
+UPI                 7100₹    
+Zomato        0
+Swiggy         0   
+Expense  750+1050+1000+2800=5600
+
+Total   10000-5600=4400 
+
+Chicken Sold               kg15
+
+Chicken Left                0kg" class="w-full bg-slate-950 border border-slate-700 focus:border-yellow-400 rounded-xl p-3 text-xs font-mono text-slate-200 outline-none"></textarea>
+
+      <div class="flex items-center justify-end gap-2">
+        <button onclick="closeBulkModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300">Cancel</button>
+        <button onclick="parseAndImportWhatsApp()" class="px-4 py-2.5 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-xs font-extrabold text-slate-950 shadow">Parse & Add to Ledger</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- MODAL: EXPENSE BREAKDOWN VIEWER                           -->
+  <!-- ========================================================= -->
+  <div id="detail-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div>
+          <h3 class="text-base font-extrabold text-white" id="detail-modal-title">Report Details</h3>
+          <p class="text-xs text-slate-400" id="detail-modal-sub">Expense breakdown & WhatsApp copy</p>
+        </div>
+        <button onclick="closeDetailModal()" class="text-slate-400 hover:text-white p-1.5 rounded-lg bg-slate-800">✕</button>
+      </div>
+
+      <div id="detail-modal-body" class="space-y-3 text-xs"></div>
+
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button onclick="closeDetailModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300">Close</button>
+        <button id="detail-copy-btn" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-xs font-extrabold text-slate-950">Copy WA Message</button>
       </div>
     </div>
   </div>
 
   <script>
-    (function() {
-      const ADMIN_PHONE = "8881544782";
-      const ADMIN_PASS = "Eshrar@";
-      let pendingAction = null;
-      let pendingTargetId = null;
+    // =========================================================
+    // 1. INITIAL DATA: ALL 18 NOVEMBER 2026 REPORTS (EXACT)
+    // =========================================================
+    const INITIAL_REPORTS = [
+      { id: 'nov-01', dateIso: '2026-11-01', displayDate: '1/ 11/ 2026', reporter: 'Rजे', cash: 2320, upi: 7480, zomato: 0, swiggy: 0, expenses: [650, 2700, 1250, 200], chickenSold: 15, chickenLeft: 0, auditNote: '' },
+      { id: 'nov-02', dateIso: '2026-11-02', displayDate: '2/ 11/ 2026', reporter: 'Azad M', cash: 2390, upi: 6140, zomato: 0, swiggy: 0, expenses: [940, 50, 80, 240, 190, 1050, 1000, 2340], chickenSold: 13, chickenLeft: 0, auditNote: '' },
+      { id: 'nov-03', dateIso: '2026-11-03', displayDate: '3/ 11/ 2026', reporter: 'Rजे', cash: 2740, upi: 5849, zomato: 0, swiggy: 0, expenses: [800, 50, 100, 150, 50, 140, 1050, 2470, 1000], chickenSold: 13, chickenLeft: 0, auditNote: 'Actual Rev ₹8,589 vs ₹8,590 written' },
+      { id: 'nov-04', dateIso: '2026-11-04', displayDate: '4/ 11/ 2026', reporter: 'Rजे', cash: 2140, upi: 6725, zomato: 0, swiggy: 0, expenses: [760, 90, 200, 150, 1050, 2470, 1000, 890], chickenSold: 13, chickenLeft: 0, auditNote: '' },
+      { id: 'nov-05', dateIso: '2026-11-05', displayDate: '5/ 11/ 2026', reporter: 'Rजे', cash: 2510, upi: 5531, zomato: 0, swiggy: 0, expenses: [530, 1050, 2340, 1000, 180, 100, 50], chickenSold: 13, chickenLeft: 0, auditNote: '' },
+      { id: 'nov-06', dateIso: '2026-11-06', displayDate: '6/ 11/ 2026', reporter: 'Rजे', cash: 2810, upi: 4708, zomato: 0, swiggy: 0, expenses: [520, 1050, 2160, 750, 190, 220, 100], chickenSold: 12, chickenLeft: 0, auditNote: '' },
+      { id: 'nov-07', dateIso: '2026-11-07', displayDate: '7/ 11/ 2026', reporter: 'Rजे', cash: 2210, upi: 5330, zomato: 0, swiggy: 0, expenses: [510, 1050, 2160, 1250, 160, 200, 50], chickenSold: 12, chickenLeft: 0, auditNote: '' },
+      { id: 'nov-08', dateIso: '2026-11-08', displayDate: '8/ 11/ 2026', reporter: 'Rजे', cash: 2390, upi: 5630, zomato: 0, swiggy: 0, expenses: [610, 1050, 2160, 1000, 160, 160, 200], chickenSold: 12, chickenLeft: 0, auditNote: '' },
+      { id: 'nov-09', dateIso: '2026-11-09', displayDate: '9/ 11/ 2026', reporter: 'Rजे', cash: 1810, upi: 6051, zomato: 0, swiggy: 0, expenses: [500, 1050, 2160, 200, 70], chickenSold: 12, chickenLeft: 0, auditNote: '' },
+      { id: 'nov-10', dateIso: '2026-11-10', displayDate: '10/ 11/ 2026', reporter: 'Rजे', cash: 2350, upi: 5559, zomato: 0, swiggy: 0, expenses: [800, 1050, 2160, 1000, 200, 200, 100], chickenSold: 12, chickenLeft: 0, auditNote: '' },
+      { id: 'nov-11', dateIso: '2026-11-11', displayDate: '11/ 11/ 2026', reporter: 'Rजे', cash: 2840, upi: 5720, zomato: 0, swiggy: 0, expenses: [800, 200, 200, 220, 100, 1000, 1050, 2520, 270], chickenSold: 12, chickenLeft: 0, auditNote: '' },
+      { id: 'nov-12', dateIso: '2026-11-12', displayDate: '11/ 11/ 2026 (12 Nov)', reporter: 'Rजे', cash: 3060, upi: 6028, zomato: 0, swiggy: 0, expenses: [750, 200, 150, 120, 100, 115, 60, 1050, 1250, 2380], chickenSold: 14, chickenLeft: 0, auditNote: 'Sent 13 Nov with dup 11/11 label' },
+      { id: 'nov-13', dateIso: '2026-11-13', displayDate: '13/ 11/ 2026', reporter: 'Rजे', cash: 3680, upi: 5410, zomato: 0, swiggy: 0, expenses: [640, 200, 90, 160, 1050, 1000, 2380], chickenSold: 14, chickenLeft: 0, auditNote: '' },
+      { id: 'nov-15', dateIso: '2026-11-15', displayDate: '15/ 11/ 2026', reporter: 'Rजे', cash: 2920, upi: 5986, zomato: 0, swiggy: 0, expenses: [710, 240, 160, 1050, 1000, 2380, 70], chickenSold: 14, chickenLeft: 0, auditNote: '' },
+      { id: 'nov-16', dateIso: '2026-11-16', displayDate: '16/ 11/ 2026', reporter: 'Rजे', cash: 3100, upi: 6010, zomato: 0, swiggy: 0, expenses: [930, 200, 160, 1050, 1000, 2520, 250, 600, 100], chickenSold: 14, chickenLeft: 0, auditNote: '' },
+      { id: 'nov-17', dateIso: '2026-11-17', displayDate: '17/ 11/ 2026', reporter: 'Rजे', cash: 2750, upi: 7054, zomato: 0, swiggy: 0, expenses: [700, 1050, 2800, 1000, 240, 160, 130, 100], chickenSold: 14, chickenLeft: 0, auditNote: 'Actual Rev ₹9,804 vs ₹9,774 written (+₹30)' },
+      { id: 'nov-18', dateIso: '2026-11-18', displayDate: '18/ 11/ 2026', reporter: 'Rजे', cash: 3230, upi: 6450, zomato: 0, swiggy: 0, expenses: [770, 1050, 400, 540, 1000, 3150, 120, 160, 115, 50], chickenSold: 15, chickenLeft: 0, auditNote: 'Highest Expense Day (₹7,355)' },
+      { id: 'nov-19', dateIso: '2026-11-19', displayDate: '19/ 11/ 2026', reporter: 'Rजे', cash: 2730, upi: 7400, zomato: 0, swiggy: 0, expenses: [740, 1050, 1000, 2850, 200, 160, 150, 130], chickenSold: 15, chickenLeft: 0, auditNote: 'Highest Revenue Day (₹10,130)' }
+    ];
 
-      const INITIAL_DATA = [
-        { id: 1, date: "1/11/2026", sender: "Rजे", cash: 2320, upi: 7480, zomato: 0, swiggy: 0, expStr: "650+2700+1250+200", chickenSold: 15, chickenLeft: 0 },
-        { id: 2, date: "2/11/2026", sender: "Azad M", cash: 2390, upi: 6140, zomato: 0, swiggy: 0, expStr: "940+50+80+240+190+1050+1000+2340", chickenSold: 13, chickenLeft: 0 },
-        { id: 3, date: "3/11/2026", sender: "Rजे", cash: 2740, upi: 5849, zomato: 0, swiggy: 0, expStr: "800+50+100+150+50+140+1050+2470+1000", chickenSold: 13, chickenLeft: 0 },
-        { id: 4, date: "4/11/2026", sender: "Rजे", cash: 2140, upi: 6725, zomato: 0, swiggy: 0, expStr: "760+90+200+150+1050+2470+1000+890", chickenSold: 13, chickenLeft: 0 },
-        { id: 5, date: "5/11/2026", sender: "Rजे", cash: 2510, upi: 5531, zomato: 0, swiggy: 0, expStr: "530+1050+2340+1000+180+100+50", chickenSold: 13, chickenLeft: 0 },
-        { id: 6, date: "6/11/2026", sender: "Rजे", cash: 2810, upi: 4708, zomato: 0, swiggy: 0, expStr: "520+1050+2160+750+190+220+100", chickenSold: 12, chickenLeft: 0 },
-        { id: 7, date: "7/11/2026", sender: "Rजे", cash: 2210, upi: 5330, zomato: 0, swiggy: 0, expStr: "510+1050+2160+1250+160+200+50", chickenSold: 12, chickenLeft: 0 },
-        { id: 8, date: "8/11/2026", sender: "Rजे", cash: 2390, upi: 5630, zomato: 0, swiggy: 0, expStr: "610+1050+2160+1000+160+160+200", chickenSold: 12, chickenLeft: 0 },
-        { id: 9, date: "9/11/2026", sender: "Rजे", cash: 1810, upi: 6051, zomato: 0, swiggy: 0, expStr: "500+1050+2160+200+70", chickenSold: 12, chickenLeft: 0 },
-        { id: 10, date: "10/11/2026", sender: "Rजे", cash: 2350, upi: 5559, zomato: 0, swiggy: 0, expStr: "800+1050+2160+1000+200+200+100", chickenSold: 12, chickenLeft: 0 },
-        { id: 11, date: "11/11/2026", sender: "Rजे", cash: 2840, upi: 5720, zomato: 0, swiggy: 0, expStr: "800+200+200+220+100+1000+1050+2520+270", chickenSold: 12, chickenLeft: 0 },
-        { id: 12, date: "11/11/2026 (2)", sender: "Rजे", cash: 3060, upi: 6028, zomato: 0, swiggy: 0, expStr: "750+200+150+120+100+115+60+1050+1250+2380", chickenSold: 14, chickenLeft: 0 },
-        { id: 13, date: "13/11/2026", sender: "Rजे", cash: 3680, upi: 5410, zomato: 0, swiggy: 0, expStr: "640+200+90+160+1050+1000+2380", chickenSold: 14, chickenLeft: 0 },
-        { id: 14, date: "15/11/2026", sender: "Rजे", cash: 2920, upi: 5986, zomato: 0, swiggy: 0, expStr: "710+240+160+1050+1000+2380+70", chickenSold: 14, chickenLeft: 0 },
-        { id: 15, date: "16/11/2026", sender: "Rजे", cash: 3100, upi: 6010, zomato: 0, swiggy: 0, expStr: "930+200+160+1050+1000+2520+250+600+100", chickenSold: 14, chickenLeft: 0 },
-        { id: 16, date: "17/11/2026", sender: "Rजे", cash: 2750, upi: 7054, zomato: 0, swiggy: 0, expStr: "700+1050+2800+1000+240+160+130+100", chickenSold: 14, chickenLeft: 0 },
-        { id: 17, date: "18/11/2026", sender: "Rजे", cash: 3230, upi: 6450, zomato: 0, swiggy: 0, expStr: "770+1050+400+540+1000+3150+120+160+115+50", chickenSold: 15, chickenLeft: 0 },
-        { id: 18, date: "19/11/2026", sender: "Rजे", cash: 2730, upi: 7400, zomato: 0, swiggy: 0, expStr: "740+1050+1000+2850+200+160+150+130", chickenSold: 15, chickenLeft: 0 }
-      ];
+    const STORAGE_KEY = 'mister_shawarma_reports_v1';
+    let reports = [];
+    let dailyChartInstance = null;
+    let paymentChartInstance = null;
+    let halfChartInstance = null;
 
-      let reports = [];
+    // =========================================================
+    // 2. INITIALIZATION & STORAGE
+    // =========================================================
+    function loadReports() {
       try {
-        const saved = localStorage.getItem("ms_sales_reports_v3");
-        reports = saved ? JSON.parse(saved) : [...INITIAL_DATA];
-      } catch (e) {
-        reports = [...INITIAL_DATA];
-      }
-
-      let chartInstance = null;
-
-      function saveStorage() {
-        try { localStorage.setItem("ms_sales_reports_v3", JSON.stringify(reports)); } catch (e) {}
-      }
-
-      function sumExp(expStr) {
-        if (!expStr) return 0;
-        return String(expStr).split("+").map(s => parseFloat(s.replace(/[^\d.]/g, "")) || 0).reduce((a, b) => a + b, 0);
-      }
-
-      function fmtINR(num) {
-        return "₹" + Math.round(num).toLocaleString("en-IN");
-      }
-
-      function computeRow(r) {
-        const rev = (Number(r.cash) || 0) + (Number(r.upi) || 0) + (Number(r.zomato) || 0) + (Number(r.swiggy) || 0);
-        const exp = sumExp(r.expStr);
-        const net = rev - exp;
-        const avg = r.chickenSold > 0 ? Math.round(rev / r.chickenSold) : 0;
-        return { ...r, rev, exp, net, avg };
-      }
-
-      function addExpenseRow(amount, note) {
-        const container = document.getElementById("expenseRowsContainer");
-        const row = document.createElement("div");
-        row.className = "exp-row grid grid-cols-12 gap-2 items-center";
-        row.innerHTML =
-          '<div class="col-span-5"><input type="number" inputmode="numeric" value="' + (amount || "") + '" placeholder="Amount ₹" class="exp-amt w-full bg-[#0b101b] border border-slate-700 rounded-xl px-3 py-2 text-sm text-white outline-none" /></div>' +
-          '<div class="col-span-6"><input type="text" value="' + (note || "") + '" placeholder="Item note (Chicken, Oil)" class="exp-note w-full bg-[#0b101b] border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200 outline-none" /></div>' +
-          '<div class="col-span-1 text-right"><button type="button" class="btn-del-exp text-slate-400 hover:text-rose-400 font-bold text-lg px-1">&times;</button></div>';
-        row.querySelector(".exp-amt").addEventListener("input", updateLivePreview);
-        row.querySelector(".exp-note").addEventListener("input", updateLivePreview);
-        row.querySelector(".btn-del-exp").addEventListener("click", function() {
-          row.remove();
-          updateLivePreview();
-        });
-        container.appendChild(row);
-        updateLivePreview();
-      }
-
-      function initDefaultExpenseRows() {
-        const container = document.getElementById("expenseRowsContainer");
-        container.innerHTML = "";
-        addExpenseRow("", "Chicken");
-        addExpenseRow("1050", "Fixed 1");
-        addExpenseRow("1000", "Fixed 2");
-        addExpenseRow("", "");
-      }
-
-      function getFormExpenses() {
-        const rows = document.querySelectorAll("#expenseRowsContainer .exp-row");
-        const amounts = [];
-        const notes = [];
-        rows.forEach(function(r) {
-          const val = parseFloat(r.querySelector(".exp-amt").value);
-          const note = r.querySelector(".exp-note").value.trim();
-          if (!isNaN(val) && val > 0) {
-            amounts.push(val);
-            notes.push(note ? val + " (" + note + ")" : String(val));
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            reports = parsed;
+            return;
           }
-        });
-        return {
-          formula: amounts.length ? amounts.join("+") : "0",
-          total: amounts.reduce((a, b) => a + b, 0),
-          notesStr: notes.join(", ")
+        }
+      } catch (e) {
+        console.error('Storage load failed:', e);
+      }
+      reports = JSON.parse(JSON.stringify(INITIAL_REPORTS));
+      saveToStorage();
+    }
+
+    function saveToStorage() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(reports));
+      } catch (e) {
+        console.error('Storage save failed:', e);
+      }
+    }
+
+    function resetToNovDefault() {
+      reports = JSON.parse(JSON.stringify(INITIAL_REPORTS));
+      saveToStorage();
+      refreshAllUI();
+      showToast('Reset to original 18 November 2026 reports!');
+    }
+
+    // =========================================================
+    // 3. HELPER FORMATTING FUNCTIONS
+    // =========================================================
+    function formatINR(num) {
+      return '₹' + Math.round(num).toLocaleString('en-IN');
+    }
+
+    function formatDateForWA(isoStr) {
+      if (!isoStr) return '20/ 11/ 2026';
+      const parts = isoStr.split('-');
+      if (parts.length !== 3) return isoStr;
+      const day = parseInt(parts[2], 10);
+      const month = parseInt(parts[1], 10);
+      const year = parts[0];
+      return `${day}/ ${month}/ ${year}`;
+    }
+
+    function buildWhatsAppMessage(data) {
+      const cash = Number(data.cash) || 0;
+      const upi = Number(data.upi) || 0;
+      const zomato = Number(data.zomato) || 0;
+      const swiggy = Number(data.swiggy) || 0;
+      const totalRev = cash + upi + zomato + swiggy;
+
+      const validExpenses = (data.expenses || []).map(n => Number(n) || 0).filter(n => n > 0);
+      const totalExp = validExpenses.reduce((acc, v) => acc + v, 0);
+      const expExpr = validExpenses.length > 0 ? `${validExpenses.join('+')}=${totalExp}` : '0';
+
+      const netProfit = totalRev - totalExp;
+      const sold = Number(data.chickenSold) || 0;
+      const left = Number(data.chickenLeft) || 0;
+      const avgPerKg = sold > 0 ? Math.round(totalRev / sold) : 0;
+
+      return `Sales Report
+ 
+Date       ${data.displayDate}
+
+Cash              ${cash}₹        
+UPI                 ${upi}₹    
+Zomato        ${zomato}
+Swiggy         ${swiggy}   
+Expense  ${expExpr} 
+
+Total   ${totalRev}-${totalExp}=${netProfit} 
+
+Chicken Sold               kg${sold}
+
+Chicken Left                ${left}kg 
+
+Average   ₹${avgPerKg}/kg`;
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-msg');
+      toastMsg.textContent = msg;
+      toast.classList.remove('translate-y-[-150%]', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-[-150%]', 'opacity-0');
+      }, 2600);
+    }
+
+    function copyTextToClipboard(text, successMsg = 'WhatsApp report copied!') {
+      const tempArea = document.createElement('textarea');
+      tempArea.value = text;
+      tempArea.style.position = 'fixed';
+      tempArea.style.left = '-9999px';
+      document.body.appendChild(tempArea);
+      tempArea.select();
+      try {
+        document.execCommand('copy');
+        showToast(successMsg);
+      } catch (err) {
+        showToast('Unable to copy text');
+      }
+      document.body.removeChild(tempArea);
+    }
+
+    // =========================================================
+    // 4. KPI & DASHBOARD CALCULATIONS
+    // =========================================================
+    function updateKPIs() {
+      let totalCash = 0, totalUpi = 0, totalZomato = 0, totalSwiggy = 0;
+      let totalExp = 0, totalChickenSold = 0, totalChickenLeft = 0;
+
+      reports.forEach(r => {
+        totalCash += Number(r.cash) || 0;
+        totalUpi += Number(r.upi) || 0;
+        totalZomato += Number(r.zomato) || 0;
+        totalSwiggy += Number(r.swiggy) || 0;
+        const dayExp = (r.expenses || []).reduce((a, b) => a + (Number(b) || 0), 0);
+        totalExp += dayExp;
+        totalChickenSold += Number(r.chickenSold) || 0;
+        totalChickenLeft += Number(r.chickenLeft) || 0;
+      });
+
+      const totalRev = totalCash + totalUpi + totalZomato + totalSwiggy;
+      const netProfit = totalRev - totalExp;
+      const count = reports.length || 1;
+
+      const avgRev = totalRev / count;
+      const avgExp = totalExp / count;
+      const avgProfit = netProfit / count;
+      const marginPct = totalRev > 0 ? ((netProfit / totalRev) * 100).toFixed(1) : '0.0';
+      const expPct = totalRev > 0 ? ((totalExp / totalRev) * 100).toFixed(1) : '0.0';
+
+      const digitalTotal = totalUpi + totalZomato + totalSwiggy;
+      const upiPct = totalRev > 0 ? ((totalUpi / totalRev) * 100).toFixed(1) : '0.0';
+      const cashPct = totalRev > 0 ? ((totalCash / totalRev) * 100).toFixed(1) : '0.0';
+
+      const revPerKg = totalChickenSold > 0 ? Math.round(totalRev / totalChickenSold) : 0;
+      const netPerKg = totalChickenSold > 0 ? Math.round(netProfit / totalChickenSold) : 0;
+      const totalStock = totalChickenSold + totalChickenLeft;
+      const sellThrough = totalStock > 0 ? Math.round((totalChickenSold / totalStock) * 100) : 100;
+
+      document.getElementById('kpi-days-badge').textContent = `${reports.length} Days`;
+      document.getElementById('tab-count').textContent = reports.length;
+      document.getElementById('kpi-revenue').textContent = formatINR(totalRev);
+      document.getElementById('kpi-avg-rev').textContent = formatINR(avgRev);
+
+      document.getElementById('kpi-expense').textContent = formatINR(totalExp);
+      document.getElementById('kpi-exp-pct').textContent = `${expPct}%`;
+      document.getElementById('kpi-avg-exp').textContent = formatINR(avgExp);
+
+      document.getElementById('kpi-profit').textContent = formatINR(netProfit);
+      document.getElementById('kpi-margin').textContent = `${marginPct}%`;
+      document.getElementById('kpi-avg-profit').textContent = formatINR(avgProfit);
+
+      document.getElementById('kpi-upi').textContent = formatINR(totalUpi);
+      document.getElementById('kpi-cash').textContent = formatINR(totalCash);
+      document.getElementById('kpi-upi-pct').textContent = `${upiPct}% UPI`;
+      document.getElementById('kpi-upi-bar').style.width = `${upiPct}%`;
+      document.getElementById('kpi-cash-bar').style.width = `${cashPct}%`;
+
+      document.getElementById('kpi-chicken').textContent = totalChickenSold;
+      document.getElementById('kpi-sellthrough').textContent = `${sellThrough}% Sold`;
+      document.getElementById('kpi-rev-kg').textContent = `₹${revPerKg}`;
+      document.getElementById('kpi-net-kg').textContent = `₹${netPerKg}`;
+    }
+
+    // =========================================================
+    // 5. ENTRY FORM & DYNAMIC EXPENSE ROWS
+    // =========================================================
+    function addExpenseRow(amount = '', note = '') {
+      const container = document.getElementById('expense-rows-container');
+      const row = document.createElement('div');
+      row.className = 'flex items-center gap-2 expense-row';
+      row.innerHTML = `
+        <input type="number" placeholder="Amount ₹" value="${amount}" min="0" oninput="updateLivePreview()" class="exp-amt w-28 sm:w-32 bg-slate-950 border border-slate-700 focus:border-rose-400 rounded-xl px-3 py-2 text-xs sm:text-sm font-bold text-rose-300 outline-none" />
+        <input type="text" placeholder="Item note (e.g. Chicken, Oil, Gas...)" value="${note}" class="exp-note flex-1 bg-slate-950 border border-slate-700 focus:border-slate-500 rounded-xl px-3 py-2 text-xs text-slate-300 outline-none" />
+        <button type="button" onclick="removeExpenseRow(this)" class="p-2 rounded-xl bg-slate-800 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition" title="Remove">
+          ✕
+        </button>
+      `;
+      container.appendChild(row);
+      updateLivePreview();
+    }
+
+    function removeExpenseRow(btn) {
+      const container = document.getElementById('expense-rows-container');
+      if (container.children.length > 1) {
+        btn.parentElement.remove();
+      } else {
+        btn.parentElement.querySelector('.exp-amt').value = '';
+        btn.parentElement.querySelector('.exp-note').value = '';
+      }
+      updateLivePreview();
+    }
+
+    function getFormPayload() {
+      const dateIso = document.getElementById('inp-date').value || '2026-11-20';
+      const reporter = document.getElementById('inp-reporter').value || 'Rजे';
+      const cash = Number(document.getElementById('inp-cash').value) || 0;
+      const upi = Number(document.getElementById('inp-upi').value) || 0;
+      const zomato = Number(document.getElementById('inp-zomato').value) || 0;
+      const swiggy = Number(document.getElementById('inp-swiggy').value) || 0;
+      const chickenSold = Number(document.getElementById('inp-chicken-sold').value) || 0;
+      const chickenLeft = Number(document.getElementById('inp-chicken-left').value) || 0;
+
+      const expenses = [];
+      document.querySelectorAll('#expense-rows-container .exp-amt').forEach(inp => {
+        const val = Number(inp.value);
+        if (val > 0) expenses.push(val);
+      });
+
+      return {
+        dateIso,
+        displayDate: formatDateForWA(dateIso),
+        reporter,
+        cash,
+        upi,
+        zomato,
+        swiggy,
+        expenses,
+        chickenSold,
+        chickenLeft
+      };
+    }
+
+    function updateLivePreview() {
+      const data = getFormPayload();
+      const totalRev = data.cash + data.upi + data.zomato + data.swiggy;
+      const totalExp = data.expenses.reduce((a, b) => a + b, 0);
+      const netProfit = totalRev - totalExp;
+
+      document.getElementById('exp-formula-preview').textContent = data.expenses.length > 0 ? data.expenses.join('+') : '0';
+      document.getElementById('exp-total-preview').textContent = totalExp.toLocaleString('en-IN');
+
+      document.getElementById('calc-total-sale').textContent = formatINR(totalRev);
+      document.getElementById('calc-total-exp').textContent = formatINR(totalExp);
+      const netEl = document.getElementById('calc-net-profit');
+      netEl.textContent = formatINR(netProfit);
+      netEl.className = netProfit >= 0 ? 'text-base sm:text-lg font-extrabold text-yellow-400' : 'text-base sm:text-lg font-extrabold text-rose-500';
+
+      document.getElementById('whatsapp-preview-box').textContent = buildWhatsAppMessage(data);
+    }
+
+    function clearForm() {
+      document.getElementById('edit-id').value = '';
+      document.getElementById('form-title').textContent = 'Naya Daily Sales Report';
+      document.getElementById('save-btn-text').textContent = 'Save to Ledger';
+      document.getElementById('inp-date').value = '2026-11-20';
+      document.getElementById('inp-reporter').value = 'Rजे';
+      document.getElementById('inp-cash').value = '';
+      document.getElementById('inp-upi').value = '';
+      document.getElementById('inp-zomato').value = '0';
+      document.getElementById('inp-swiggy').value = '0';
+      document.getElementById('inp-chicken-sold').value = '15';
+      document.getElementById('inp-chicken-left').value = '0';
+
+      const container = document.getElementById('expense-rows-container');
+      container.innerHTML = '';
+      addExpenseRow('', 'Chicken');
+      addExpenseRow(1050, 'Fixed 1');
+      addExpenseRow(1000, 'Fixed 2');
+      updateLivePreview();
+    }
+
+    function saveReport() {
+      const payload = getFormPayload();
+      if (payload.cash === 0 && payload.upi === 0 && payload.zomato === 0 && payload.swiggy === 0) {
+        showToast('Please enter Cash or UPI sales amount!');
+        return;
+      }
+
+      const editId = document.getElementById('edit-id').value;
+      if (editId) {
+        const idx = reports.findIndex(r => r.id === editId);
+        if (idx !== -1) {
+          reports[idx] = { ...reports[idx], ...payload };
+          showToast('Report updated in Ledger!');
+        }
+      } else {
+        const newEntry = {
+          id: 'rep-' + Date.now(),
+          ...payload,
+          auditNote: ''
         };
+        reports.push(newEntry);
+        showToast('Naya Sales Report saved!');
       }
 
-      function renderKPIs() {
-        const rows = reports.map(computeRow);
-        const totRev = rows.reduce((a, b) => a + b.rev, 0);
-        const totExp = rows.reduce((a, b) => a + b.exp, 0);
-        const totNet = rows.reduce((a, b) => a + b.net, 0);
-        const totUpi = rows.reduce((a, b) => a + Number(b.upi), 0);
-        const totChicken = rows.reduce((a, b) => a + Number(b.chickenSold), 0);
-        const margin = totRev > 0 ? ((totNet / totRev) * 100).toFixed(1) : "0.0";
-        const upiPct = totRev > 0 ? ((totUpi / totRev) * 100).toFixed(1) : "0.0";
+      saveToStorage();
+      refreshAllUI();
+      clearForm();
+    }
 
-        document.getElementById("reportCount").innerText = rows.length;
-        document.getElementById("kpiCards").innerHTML =
-          '<div class="bg-[#111827] border border-slate-800 rounded-2xl p-3">' +
-            '<p class="text-[11px] text-slate-400">Total Revenue (' + rows.length + 'd)</p>' +
-            '<p class="text-lg font-extrabold text-white mt-0.5">' + fmtINR(totRev) + '</p>' +
-            '<p class="text-[10px] text-emerald-400 mt-0.5">UPI ' + upiPct + '% • Cash ' + (100 - upiPct).toFixed(1) + '%</p>' +
-          '</div>' +
-          '<div class="bg-[#111827] border border-slate-800 rounded-2xl p-3">' +
-            '<p class="text-[11px] text-slate-400">Net Profit (' + margin + '%)</p>' +
-            '<p class="text-lg font-extrabold text-yellow-400 mt-0.5">' + fmtINR(totNet) + '</p>' +
-            '<p class="text-[10px] text-slate-400 mt-0.5">Avg ' + fmtINR(rows.length ? totNet / rows.length : 0) + '/day</p>' +
-          '</div>' +
-          '<div class="bg-[#111827] border border-slate-800 rounded-2xl p-3">' +
-            '<p class="text-[11px] text-slate-400">Total Expenses</p>' +
-            '<p class="text-base font-bold text-rose-400 mt-0.5">' + fmtINR(totExp) + '</p>' +
-            '<p class="text-[10px] text-slate-400 mt-0.5">Avg ' + fmtINR(rows.length ? totExp / rows.length : 0) + '/day</p>' +
-          '</div>' +
-          '<div class="bg-[#111827] border border-slate-800 rounded-2xl p-3">' +
-            '<p class="text-[11px] text-slate-400">Chicken Sold</p>' +
-            '<p class="text-base font-bold text-sky-400 mt-0.5">' + totChicken + ' kg</p>' +
-            '<p class="text-[10px] text-slate-400 mt-0.5">' + fmtINR(totChicken ? totRev / totChicken : 0) + ' rev/kg</p>' +
-          '</div>';
+    function copyWhatsAppText() {
+      const text = document.getElementById('whatsapp-preview-box').textContent;
+      copyTextToClipboard(text, 'WhatsApp Report copied to clipboard!');
+    }
+
+    function shareOnWhatsApp() {
+      const text = document.getElementById('whatsapp-preview-box').textContent;
+      copyTextToClipboard(text, 'Copied! Opening WhatsApp...');
+      const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+      window.open(url, '_blank');
+    }
+
+    // =========================================================
+    // 6. LEDGER TABLE, EDIT, DELETE & DETAIL VIEW
+    // =========================================================
+    function renderLedger() {
+      const query = (document.getElementById('ledger-search').value || '').toLowerCase().trim();
+      const tbody = document.getElementById('ledger-tbody');
+      tbody.innerHTML = '';
+
+      const filtered = reports.filter(r =>
+        r.displayDate.toLowerCase().includes(query) ||
+        r.reporter.toLowerCase().includes(query) ||
+        (r.auditNote && r.auditNote.toLowerCase().includes(query))
+      );
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="py-8 text-center text-slate-500 text-xs">No reports found matching "${query}"</td></tr>`;
+        return;
       }
 
-      function formatWhatsAppReport(r) {
-        const c = computeRow(r);
-        const cleanExp = (r.expStr || "0").replace(/\s+/g, "");
-        return "Sales Report\n \nDate       " + r.date + "\n\nCash              " + r.cash + "₹        \nUPI                 " + r.upi + "₹    \nZomato        " + r.zomato + "\nSwiggy         " + r.swiggy + "   \nExpense  " + cleanExp + "=" + c.exp.toLocaleString("en-IN") + " ₹\n\nTotal   " + c.rev.toLocaleString("en-IN") + "-" + c.exp + "=" + c.net.toLocaleString("en-IN") + " ₹\n\nChicken Sold               kg" + r.chickenSold + "\n\nChicken Left                " + r.chickenLeft + "kg \n\nAverage                 " + c.avg + "₹/kg";
+      filtered.forEach((r, index) => {
+        const rev = (Number(r.cash) || 0) + (Number(r.upi) || 0) + (Number(r.zomato) || 0) + (Number(r.swiggy) || 0);
+        const exp = (r.expenses || []).reduce((a, b) => a + (Number(b) || 0), 0);
+        const net = rev - exp;
+
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-800/50 transition';
+        tr.innerHTML = `
+          <td class="py-3 px-3.5 whitespace-nowrap">
+            <div class="font-bold text-white">${r.displayDate}</div>
+            <div class="text-[11px] text-slate-400 flex items-center gap-1.5">
+              <span>${r.reporter}</span>
+              ${r.auditNote ? `<span class="text-[10px] bg-yellow-400/15 text-yellow-300 px-1.5 py-0.2 rounded border border-yellow-400/30">Audit</span>` : ''}
+            </div>
+          </td>
+          <td class="py-3 px-3 whitespace-nowrap text-emerald-400 font-semibold">₹${r.cash.toLocaleString('en-IN')}</td>
+          <td class="py-3 px-3 whitespace-nowrap text-sky-400 font-semibold">₹${r.upi.toLocaleString('en-IN')}</td>
+          <td class="py-3 px-3 whitespace-nowrap font-bold text-white">₹${rev.toLocaleString('en-IN')}</td>
+          <td class="py-3 px-3 whitespace-nowrap">
+            <button onclick="openDetailModal('${r.id}')" class="text-rose-400 hover:underline font-semibold flex items-center gap-1">
+              <span>₹${exp.toLocaleString('en-IN')}</span>
+              <span class="text-[10px] text-slate-400">(${r.expenses.length})</span>
+            </button>
+          </td>
+          <td class="py-3 px-3 whitespace-nowrap font-extrabold text-yellow-400">₹${net.toLocaleString('en-IN')}</td>
+          <td class="py-3 px-3 whitespace-nowrap text-slate-300 font-medium">${r.chickenSold} kg</td>
+          <td class="py-3 px-3.5 whitespace-nowrap text-right">
+            <div class="inline-flex items-center gap-1">
+              <button onclick="copySingleReport('${r.id}')" title="Copy WhatsApp Format" class="p-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/30 text-emerald-400 text-xs font-bold">
+                WA
+              </button>
+              <button onclick="editReport('${r.id}')" title="Edit Report" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs">
+                ✏️
+              </button>
+              <button onclick="deleteReport('${r.id}')" title="Delete Report" class="p-1.5 rounded-lg bg-slate-800 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 text-xs">
+                🗑️
+              </button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function copySingleReport(id) {
+      const rep = reports.find(r => r.id === id);
+      if (!rep) return;
+      copyTextToClipboard(buildWhatsAppMessage(rep), `Copied ${rep.displayDate} report!`);
+    }
+
+    function editReport(id) {
+      const rep = reports.find(r => r.id === id);
+      if (!rep) return;
+
+      document.getElementById('edit-id').value = rep.id;
+      document.getElementById('form-title').textContent = `Edit Report (${rep.displayDate})`;
+      document.getElementById('save-btn-text').textContent = 'Update Report';
+      document.getElementById('inp-date').value = rep.dateIso || '2026-11-20';
+      document.getElementById('inp-reporter').value = rep.reporter || 'Rजे';
+      document.getElementById('inp-cash').value = rep.cash;
+      document.getElementById('inp-upi').value = rep.upi;
+      document.getElementById('inp-zomato').value = rep.zomato || 0;
+      document.getElementById('inp-swiggy').value = rep.swiggy || 0;
+      document.getElementById('inp-chicken-sold').value = rep.chickenSold;
+      document.getElementById('inp-chicken-left').value = rep.chickenLeft || 0;
+
+      const container = document.getElementById('expense-rows-container');
+      container.innerHTML = '';
+      if (rep.expenses && rep.expenses.length > 0) {
+        rep.expenses.forEach(amt => addExpenseRow(amt, ''));
+      } else {
+        addExpenseRow('', '');
       }
 
-      function updateLivePreview() {
-        const expObj = getFormExpenses();
-        document.getElementById("expFormulaText").innerText = expObj.formula;
-        document.getElementById("expTotalText").innerText = fmtINR(expObj.total);
+      updateLivePreview();
+      switchTab('entry');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
-        const draft = {
-          date: document.getElementById("inDate").value || "20/11/2026",
-          sender: document.getElementById("inSender").value || "Rजे",
-          cash: Number(document.getElementById("inCash").value) || 0,
-          upi: Number(document.getElementById("inUpi").value) || 0,
-          zomato: Number(document.getElementById("inZomato").value) || 0,
-          swiggy: Number(document.getElementById("inSwiggy").value) || 0,
-          expStr: expObj.formula,
-          chickenSold: Number(document.getElementById("inChickenSold").value) || 0,
-          chickenLeft: Number(document.getElementById("inChickenLeft").value) || 0
-        };
-        const c = computeRow(draft);
-        document.getElementById("liveRevBadge").innerText = "Total: " + fmtINR(c.rev);
-        document.getElementById("liveNetBadge").innerText = "Net Profit: " + fmtINR(c.net);
-        document.getElementById("inAvg").value = c.avg ? "₹" + c.avg + "/kg" : "0";
-        document.getElementById("waPreview").innerText = formatWhatsAppReport(draft);
+    function deleteReport(id) {
+      if (reports.length <= 1) {
+        showToast('At least 1 report must remain in ledger');
+        return;
+      }
+      reports = reports.filter(r => r.id !== id);
+      saveToStorage();
+      refreshAllUI();
+      showToast('Report removed from ledger');
+    }
+
+    function openDetailModal(id) {
+      const rep = reports.find(r => r.id === id);
+      if (!rep) return;
+      const rev = rep.cash + rep.upi + (rep.zomato || 0) + (rep.swiggy || 0);
+      const exp = rep.expenses.reduce((a, b) => a + b, 0);
+      const net = rev - exp;
+
+      document.getElementById('detail-modal-title').textContent = `${rep.displayDate} (${rep.reporter})`;
+      document.getElementById('detail-modal-sub').textContent = `Revenue ₹${rev.toLocaleString('en-IN')} • Net Profit ₹${net.toLocaleString('en-IN')}`;
+
+      const badges = rep.expenses.map((amt, i) => `
+        <span class="px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 font-mono text-rose-300 font-bold">
+          #${i + 1}: ₹${amt}
+        </span>
+      `).join('');
+
+      document.getElementById('detail-modal-body').innerHTML = `
+        ${rep.auditNote ? `<div class="p-2.5 rounded-xl bg-yellow-400/10 border border-yellow-400/30 text-yellow-300"><strong>Audit Note:</strong> ${rep.auditNote}</div>` : ''}
+        <div>
+          <div class="text-slate-400 font-semibold mb-2">Expense Line Items (${rep.expenses.length} items = ₹${exp}):</div>
+          <div class="flex flex-wrap gap-2">${badges}</div>
+        </div>
+        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 font-mono text-[11px] text-slate-300 whitespace-pre-wrap">${buildWhatsAppMessage(rep)}</div>
+      `;
+
+      document.getElementById('detail-copy-btn').onclick = () => {
+        copySingleReport(rep.id);
+        closeDetailModal();
+      };
+
+      const modal = document.getElementById('detail-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeDetailModal() {
+      const modal = document.getElementById('detail-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    // =========================================================
+    // 7. WHATSAPP BULK PASTE PARSER
+    // =========================================================
+    function openBulkModal() {
+      const modal = document.getElementById('bulk-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeBulkModal() {
+      const modal = document.getElementById('bulk-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function parseAndImportWhatsApp() {
+      const raw = document.getElementById('bulk-wa-input').value.trim();
+      if (!raw) {
+        showToast('Please paste WhatsApp report text first!');
+        return;
       }
 
-      function openAuthModal(action, targetId) {
-        pendingAction = action;
-        pendingTargetId = targetId;
-        document.getElementById("authPhoneInput").value = "";
-        document.getElementById("authPassInput").value = "";
-        document.getElementById("authErrorMsg").classList.add("hidden");
-        document.getElementById("authModalDesc").innerText = action === "reset"
-          ? "Poora data reset karne ke liye Admin Number aur Password dalein:"
-          : "Is report ko delete karne ke liye Admin Number aur Password dalein:";
-        document.getElementById("authModal").classList.remove("hidden");
-      }
+      // Split by "Sales Report" blocks
+      const blocks = raw.split(/Sales Report/i).filter(b => b.trim().length > 10);
+      let importedCount = 0;
 
-      function closeAuthModal() {
-        pendingAction = null;
-        pendingTargetId = null;
-        document.getElementById("authModal").classList.add("hidden");
-      }
+      blocks.forEach((block, idx) => {
+        const dateMatch = block.match(/Date\s+([0-9]{1,2}\s*\/\s*[0-9]{1,2}\s*\/\s*[0-9]{2,4})/i);
+        const cashMatch = block.match(/Cash\s+([0-9,]+)/i);
+        const upiMatch = block.match(/UPI\s+([0-9,]+)/i);
+        const zomatoMatch = block.match(/Zomato\s+([0-9,]+)/i);
+        const swiggyMatch = block.match(/Swiggy\s+([0-9,]+)/i);
+        const expMatch = block.match(/Expense\s+([0-9+\s]+)/i);
+        const soldMatch = block.match(/Chicken Sold\s+(?:kg\s*)?([0-9.]+)/i);
+        const leftMatch = block.match(/Chicken Left\s+([0-9.]+)/i);
 
-      function renderLedger() {
-        const container = document.getElementById("ledgerList");
-        container.innerHTML = "";
-        const rows = reports.map(computeRow).reverse();
-        rows.forEach(function(r) {
-          const card = document.createElement("div");
-          card.className = "bg-[#111827] border border-slate-800 rounded-2xl p-3.5 space-y-2";
-          card.innerHTML =
-            '<div class="flex justify-between items-center">' +
-              '<div><span class="text-xs font-extrabold text-yellow-400">' + r.date + '</span><span class="text-[11px] text-slate-400 ml-2">by ' + r.sender + ' • ' + r.chickenSold + ' kg</span></div>' +
-              '<button type="button" class="btn-lock-del bg-rose-500/15 border border-rose-500/40 text-rose-300 text-[11px] font-bold px-2.5 py-1 rounded-lg active:scale-95">🔒 Delete</button>' +
-            '</div>' +
-            '<div class="grid grid-cols-3 gap-2 text-center bg-[#0b101b] rounded-xl p-2">' +
-              '<div><p class="text-[10px] text-slate-400">Revenue</p><p class="text-xs font-bold text-white">' + fmtINR(r.rev) + '</p></div>' +
-              '<div><p class="text-[10px] text-slate-400">Expense</p><p class="text-xs font-bold text-rose-400">' + fmtINR(r.exp) + '</p></div>' +
-              '<div><p class="text-[10px] text-slate-400">Net Profit</p><p class="text-xs font-extrabold text-emerald-400">' + fmtINR(r.net) + '</p></div>' +
-            '</div>' +
-            '<p class="text-[11px] text-slate-400 truncate">Cash: ₹' + r.cash + ' | UPI: ₹' + r.upi + ' | Exp: ' + (r.expNotes || r.expStr) + '</p>';
-          card.querySelector(".btn-lock-del").addEventListener("click", function() {
-            openAuthModal("delete", r.id);
+        if (cashMatch || upiMatch) {
+          const displayDate = dateMatch ? dateMatch[1].replace(/\s+/g, ' ').trim() : `New Entry #${idx + 1}`;
+          const cash = cashMatch ? Number(cashMatch[1].replace(/,/g, '')) : 0;
+          const upi = upiMatch ? Number(upiMatch[1].replace(/,/g, '')) : 0;
+          const zomato = zomatoMatch ? Number(zomatoMatch[1].replace(/,/g, '')) : 0;
+          const swiggy = swiggyMatch ? Number(swiggyMatch[1].replace(/,/g, '')) : 0;
+
+          let expenses = [];
+          if (expMatch) {
+            expenses = expMatch[1]
+              .split('+')
+              .map(s => Number(s.trim()))
+              .filter(n => !isNaN(n) && n > 0);
+          }
+
+          const chickenSold = soldMatch ? Number(soldMatch[1]) : 0;
+          const chickenLeft = leftMatch ? Number(leftMatch[1]) : 0;
+
+          // Build ISO date if possible
+          let dateIso = '2026-11-20';
+          const dParts = displayDate.split('/').map(s => s.trim());
+          if (dParts.length === 3) {
+            const yr = dParts[2].length === 2 ? '20' + dParts[2] : dParts[2];
+            const mo = dParts[1].padStart(2, '0');
+            const dy = dParts[0].padStart(2, '0');
+            dateIso = `${yr}-${mo}-${dy}`;
+          }
+
+          reports.push({
+            id: 'wa-' + Date.now() + '-' + idx,
+            dateIso,
+            displayDate,
+            reporter: 'Rजे',
+            cash,
+            upi,
+            zomato,
+            swiggy,
+            expenses,
+            chickenSold,
+            chickenLeft,
+            auditNote: 'Imported from WhatsApp'
           });
-          container.appendChild(card);
-        });
-      }
+          importedCount++;
+        }
+      });
 
-      function renderChart() {
-        if (typeof Chart === "undefined") return;
-        const ctx = document.getElementById("salesChart").getContext("2d");
-        const mode = document.getElementById("chartMode").value;
-        const rows = reports.map(computeRow);
-        const labels = rows.map(r => r.date.replace("/2026", ""));
-        if (chartInstance) chartInstance.destroy();
-        const datasets = mode === "profit" ? [
-          { label: "Revenue", data: rows.map(r => r.rev), backgroundColor: "#facc15" },
-          { label: "Expense", data: rows.map(r => r.exp), backgroundColor: "#fb7185" },
-          { label: "Net Profit", data: rows.map(r => r.net), backgroundColor: "#34d399" }
-        ] : [
-          { label: "UPI", data: rows.map(r => r.upi), backgroundColor: "#38bdf8" },
-          { label: "Cash", data: rows.map(r => r.cash), backgroundColor: "#fbbf24" }
-        ];
-        chartInstance = new Chart(ctx, {
-          type: "bar",
-          data: { labels: labels, datasets: datasets },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { labels: { color: "#cbd5e1", font: { size: 11 } } } },
-            scales: {
-              x: { ticks: { color: "#94a3b8", font: { size: 9 } }, grid: { display: false } },
-              y: { ticks: { color: "#94a3b8", font: { size: 10 } }, grid: { color: "#1e293b" } }
+      if (importedCount > 0) {
+        saveToStorage();
+        refreshAllUI();
+        document.getElementById('bulk-wa-input').value = '';
+        closeBulkModal();
+        switchTab('ledger');
+        showToast(`${importedCount} WhatsApp report(s) added to Ledger!`);
+      } else {
+        showToast('Could not detect valid Sales Report format.');
+      }
+    }
+
+    // =========================================================
+    // 8. CHART.JS INTERACTIVE ANALYTICS
+    // =========================================================
+    function renderCharts() {
+      const labels = reports.map(r => r.displayDate.replace('/ 2026', '').replace(/\s+/g, ''));
+      const revData = reports.map(r => r.cash + r.upi + (r.zomato || 0) + (r.swiggy || 0));
+      const expData = reports.map(r => r.expenses.reduce((a, b) => a + b, 0));
+      const netData = revData.map((rev, i) => rev - expData[i]);
+
+      // 1. Daily Bar/Line Chart
+      const ctxDaily = document.getElementById('dailyChart').getContext('2d');
+      if (dailyChartInstance) dailyChartInstance.destroy();
+      dailyChartInstance = new Chart(ctxDaily, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Revenue (₹)',
+              data: revData,
+              backgroundColor: 'rgba(56, 189, 248, 0.8)',
+              borderRadius: 6,
+            },
+            {
+              label: 'Expense (₹)',
+              data: expData,
+              backgroundColor: 'rgba(251, 113, 133, 0.8)',
+              borderRadius: 6,
+            },
+            {
+              label: 'Net Profit (₹)',
+              data: netData,
+              type: 'line',
+              borderColor: '#FACC15',
+              backgroundColor: '#FACC15',
+              borderWidth: 3,
+              pointRadius: 4,
+              tension: 0.3,
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#0F172A',
+              titleColor: '#FACC15',
+              bodyColor: '#F8FAFC',
+              borderColor: '#334155',
+              borderWidth: 1,
+            }
+          },
+          scales: {
+            x: {
+              ticks: { color: '#94A3B8', font: { size: 10 } },
+              grid: { display: false }
+            },
+            y: {
+              ticks: {
+                color: '#94A3B8',
+                font: { size: 10 },
+                callback: val => '₹' + val.toLocaleString('en-IN')
+              },
+              grid: { color: 'rgba(51, 65, 85, 0.4)' }
             }
           }
-        });
-      }
-
-      function switchTab(tab) {
-        ["entry", "charts", "ledger"].forEach(function(t) {
-          document.getElementById("view-" + t).classList.toggle("hidden", t !== tab);
-          const btn = document.getElementById("tab-" + t);
-          btn.className = t === tab
-            ? "bg-yellow-400 text-slate-950 font-extrabold text-xs px-3.5 py-2 rounded-xl whitespace-nowrap shadow"
-            : "bg-[#131b2e] border border-slate-800 text-slate-300 font-semibold text-xs px-3.5 py-2 rounded-xl whitespace-nowrap";
-        });
-        if (tab === "charts") renderChart();
-      }
-
-      function renderAll() {
-        renderKPIs();
-        renderLedger();
-        updateLivePreview();
-      }
-
-      // Bind all static buttons cleanly
-      document.getElementById("tab-entry").addEventListener("click", function() { switchTab("entry"); });
-      document.getElementById("tab-charts").addEventListener("click", function() { switchTab("charts"); });
-      document.getElementById("tab-ledger").addEventListener("click", function() { switchTab("ledger"); });
-
-      document.getElementById("btnAdd1050").addEventListener("click", function() { addExpenseRow(1050, "Fixed 1"); });
-      document.getElementById("btnAdd1000").addEventListener("click", function() { addExpenseRow(1000, "Fixed 2"); });
-      document.getElementById("btnAddItem").addEventListener("click", function() { addExpenseRow("", ""); });
-
-      ["inDate", "inSender", "inCash", "inUpi", "inZomato", "inSwiggy", "inChickenSold", "inChickenLeft"].forEach(function(id) {
-        document.getElementById(id).addEventListener("input", updateLivePreview);
-      });
-
-      document.getElementById("btnSaveReport").addEventListener("click", function() {
-        const expObj = getFormExpenses();
-        reports.push({
-          id: Date.now(),
-          date: document.getElementById("inDate").value.trim() || "20/11/2026",
-          sender: document.getElementById("inSender").value.trim() || "Rजे",
-          cash: Number(document.getElementById("inCash").value) || 0,
-          upi: Number(document.getElementById("inUpi").value) || 0,
-          zomato: Number(document.getElementById("inZomato").value) || 0,
-          swiggy: Number(document.getElementById("inSwiggy").value) || 0,
-          expStr: expObj.formula,
-          expNotes: expObj.notesStr,
-          chickenSold: Number(document.getElementById("inChickenSold").value) || 0,
-          chickenLeft: Number(document.getElementById("inChickenLeft").value) || 0
-        });
-        saveStorage();
-        renderAll();
-        alert("Report saved successfully!");
-      });
-
-      document.getElementById("btnResetForm").addEventListener("click", function() {
-        document.getElementById("inCash").value = "";
-        document.getElementById("inUpi").value = "";
-        document.getElementById("inZomato").value = "0";
-        document.getElementById("inSwiggy").value = "0";
-        initDefaultExpenseRows();
-        updateLivePreview();
-      });
-
-      document.getElementById("btnCopyWA").addEventListener("click", function() {
-        const txt = document.getElementById("waPreview").innerText;
-        if (navigator.clipboard) navigator.clipboard.writeText(txt);
-        alert("WhatsApp report copied!");
-      });
-
-      document.getElementById("btnShareWA").addEventListener("click", function() {
-        const txt = encodeURIComponent(document.getElementById("waPreview").innerText);
-        window.open("https://wa.me/?text=" + txt, "_blank");
-      });
-
-      document.getElementById("chartMode").addEventListener("change", renderChart);
-      document.getElementById("btnResetNovData").addEventListener("click", function() { openAuthModal("reset", null); });
-
-      document.getElementById("btnOpenPaste").addEventListener("click", function() { document.getElementById("pasteModal").classList.remove("hidden"); });
-      document.getElementById("btnClosePaste").addEventListener("click", function() { document.getElementById("pasteModal").classList.add("hidden"); });
-
-      document.getElementById("btnImportWA").addEventListener("click", function() {
-        const raw = document.getElementById("waPasteInput").value;
-        const blocks = raw.split(/Sales Report/i).filter(b => b.trim().length > 10);
-        let added = 0;
-        blocks.forEach(function(b) {
-          const dateM = b.match(/Date\s+([\d\/\s]+)/i);
-          const cashM = b.match(/Cash\s+(\d+)/i);
-          const upiM = b.match(/UPI\s+(\d+)/i);
-          const expM = b.match(/Expense\s+([\d+\s]+)/i);
-          const chkM = b.match(/Chicken Sold\s+kg\s*(\d+)/i);
-          if (dateM && (cashM || upiM)) {
-            reports.push({
-              id: Date.now() + Math.random(),
-              date: dateM[1].replace(/\s+/g, ""),
-              sender: "WA Import",
-              cash: cashM ? Number(cashM[1]) : 0,
-              upi: upiM ? Number(upiM[1]) : 0,
-              zomato: 0,
-              swiggy: 0,
-              expStr: expM ? expM[1].replace(/\s+/g, "") : "0",
-              chickenSold: chkM ? Number(chkM[1]) : 0,
-              chickenLeft: 0
-            });
-            added++;
-          }
-        });
-        if (added > 0) {
-          saveStorage();
-          renderAll();
-          document.getElementById("pasteModal").classList.add("hidden");
-          document.getElementById("waPasteInput").value = "";
-          alert(added + " report(s) imported!");
-        } else {
-          alert("Format samajh nahi aaya. Please check Date, Cash, UPI lines.");
         }
       });
 
-      document.getElementById("btnCloseAuth").addEventListener("click", closeAuthModal);
-      document.getElementById("btnCancelAuth").addEventListener("click", closeAuthModal);
-      document.getElementById("btnConfirmAuth").addEventListener("click", function() {
-        const enteredPhone = document.getElementById("authPhoneInput").value.replace(/\s+/g, "");
-        const enteredPass = document.getElementById("authPassInput").value.trim();
-        if (enteredPhone === ADMIN_PHONE && enteredPass === ADMIN_PASS) {
-          if (pendingAction === "delete" && pendingTargetId !== null) {
-            reports = reports.filter(r => r.id !== pendingTargetId);
-            saveStorage();
-            renderAll();
-          } else if (pendingAction === "reset") {
-            reports = [...INITIAL_DATA];
-            saveStorage();
-            renderAll();
+      // 2. Payment Mode Doughnut Chart
+      const totalCash = reports.reduce((s, r) => s + r.cash, 0);
+      const totalUpi = reports.reduce((s, r) => s + r.upi, 0);
+      const ctxPay = document.getElementById('paymentChart').getContext('2d');
+      if (paymentChartInstance) paymentChartInstance.destroy();
+      paymentChartInstance = new Chart(ctxPay, {
+        type: 'doughnut',
+        data: {
+          labels: ['UPI Collections (₹)', 'Cash Collections (₹)'],
+          datasets: [{
+            data: [totalUpi, totalCash],
+            backgroundColor: ['#38BDF8', '#34D399'],
+            borderColor: '#0F172A',
+            borderWidth: 4,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '65%',
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { color: '#E2E8F0', font: { size: 12, weight: 'bold' } }
+            }
           }
-          closeAuthModal();
-        } else {
-          document.getElementById("authErrorMsg").classList.remove("hidden");
         }
       });
 
-      const today = new Date();
-      document.getElementById("inDate").value = today.getDate() + "/" + (today.getMonth() + 1) + "/" + today.getFullYear();
-      initDefaultExpenseRows();
-      renderAll();
-    })();
+      // 3. First Half vs Second Half Comparison
+      const mid = Math.ceil(reports.length / 2);
+      const firstHalf = reports.slice(0, mid);
+      const secondHalf = reports.slice(mid);
+
+      const calcAvg = (arr, fn) => arr.length ? Math.round(arr.reduce((s, x) => s + fn(x), 0) / arr.length) : 0;
+
+      const fRev = calcAvg(firstHalf, r => r.cash + r.upi);
+      const sRev = calcAvg(secondHalf, r => r.cash + r.upi);
+      const fExp = calcAvg(firstHalf, r => r.expenses.reduce((a, b) => a + b, 0));
+      const sExp = calcAvg(secondHalf, r => r.expenses.reduce((a, b) => a + b, 0));
+      const fNet = fRev - fExp;
+      const sNet = sRev - sExp;
+
+      const ctxHalf = document.getElementById('halfComparisonChart').getContext('2d');
+      if (halfChartInstance) halfChartInstance.destroy();
+      halfChartInstance = new Chart(ctxHalf, {
+        type: 'bar',
+        data: {
+          labels: ['Daily Avg Revenue', 'Daily Avg Expense', 'Daily Avg Profit'],
+          datasets: [
+            {
+              label: `First ${firstHalf.length} Days`,
+              data: [fRev, fExp, fNet],
+              backgroundColor: '#64748B',
+              borderRadius: 6
+            },
+            {
+              label: `Last ${secondHalf.length} Days`,
+              data: [sRev, sExp, sNet],
+              backgroundColor: '#FACC15',
+              borderRadius: 6
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { color: '#E2E8F0', font: { size: 11 } }
+            }
+          },
+          scales: {
+            x: { ticks: { color: '#94A3B8', font: { size: 11 } }, grid: { display: false } },
+            y: {
+              ticks: { color: '#94A3B8', font: { size: 10 }, callback: v => '₹' + v },
+              grid: { color: 'rgba(51, 65, 85, 0.4)' }
+            }
+          }
+        }
+      });
+    }
+
+    // =========================================================
+    // 9. TAB NAVIGATION & REFRESH
+    // =========================================================
+    function switchTab(tabName) {
+      ['entry', 'charts', 'ledger'].forEach(t => {
+        const sec = document.getElementById(`tab-${t}`);
+        const btn = document.getElementById(`tab-btn-${t}`);
+        if (t === tabName) {
+          sec.classList.remove('hidden');
+          btn.className = 'tab-btn py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 bg-yellow-400 text-slate-950 shadow';
+        } else {
+          sec.classList.add('hidden');
+          btn.className = 'tab-btn py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-800';
+        }
+      });
+
+      if (tabName === 'charts') {
+        renderCharts();
+      }
+    }
+
+    function refreshAllUI() {
+      updateKPIs();
+      renderLedger();
+      if (!document.getElementById('tab-charts').classList.contains('hidden')) {
+        renderCharts();
+      }
+    }
+
+    // Boot App
+    window.addEventListener('DOMContentLoaded', () => {
+      loadReports();
+      clearForm();
+      refreshAllUI();
+      const now = new Date();
+      document.getElementById('wa-time-stamp').textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    });
   </script>
 </body>
 </html>
