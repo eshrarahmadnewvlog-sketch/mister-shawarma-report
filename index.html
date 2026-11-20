@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>Mister Shawarma - Pro Ledger</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -14,7 +17,7 @@
 </head>
 <body class="pb-24 max-w-lg mx-auto">
 
-  <!-- Top Header (Pro Ledger Style) -->
+  <!-- Top Header -->
   <header class="sticky top-0 z-30 bg-[#0d1320]/95 backdrop-blur border-b border-slate-800 px-3.5 py-3 flex items-center justify-between gap-2">
     <div class="flex items-center gap-2.5">
       <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-300 to-amber-500 text-slate-950 font-black flex items-center justify-center text-xl shadow-lg shadow-amber-500/20">
@@ -25,7 +28,7 @@
           <h1 class="text-sm font-extrabold text-white leading-tight">Mister Shawarma</h1>
           <span class="bg-amber-500/15 border border-amber-400/40 text-amber-300 text-[9px] font-extrabold px-1.5 py-0.5 rounded-md tracking-wide">PRO LEDGER</span>
         </div>
-        <p class="text-[11px] text-slate-400 leading-tight mt-0.5">Daily Sales, Expense & WhatsApp Report</p>
+        <p class="text-[11px] text-slate-400 leading-tight mt-0.5">🔒 Protected Sales & Expense App</p>
       </div>
     </div>
 
@@ -96,7 +99,7 @@
       </div>
     </div>
 
-    <!-- Section 2: Daily Expenses (Kharcha) with Quick Buttons & Item Notes -->
+    <!-- Section 2: Daily Expenses -->
     <div class="bg-[#111827] border border-slate-800 rounded-2xl p-3.5 space-y-3">
       <div class="flex items-center justify-between gap-1.5">
         <h2 class="text-xs font-extrabold text-rose-400 tracking-wider uppercase leading-tight">2. Daily Expenses<br/>(Kharcha)</h2>
@@ -113,10 +116,8 @@
         </div>
       </div>
 
-      <!-- Dynamic Expense Rows -->
       <div id="expenseRowsContainer" class="space-y-2"></div>
 
-      <!-- Formula & Total Expense Bar -->
       <div class="bg-[#0b101b] border border-slate-800 rounded-xl px-3 py-2.5 flex items-center justify-between text-xs">
         <span class="text-slate-400 truncate max-w-[58%]">Formula: <strong id="expFormulaText" class="text-slate-200 font-mono">0</strong></span>
         <span class="text-rose-400 font-extrabold">Total Expense: <span id="expTotalText">₹0</span></span>
@@ -150,7 +151,7 @@
       </button>
     </div>
 
-    <!-- Section 4: Exact WhatsApp Format Preview -->
+    <!-- Section 4: WhatsApp Format Preview -->
     <div class="bg-[#111827] border border-emerald-500/30 rounded-2xl p-3.5 space-y-3">
       <div class="flex items-center justify-between">
         <span class="text-xs font-bold text-emerald-400">WhatsApp Format Preview</span>
@@ -184,363 +185,4 @@
         <li><strong>17/11/2026 (+₹30 Under-reported):</strong> Cash ₹2,750 + UPI ₹7,054 = <strong>₹9,804</strong> (likha gaya ₹9,774). Actual Net Profit: <strong>₹3,624</strong>.</li>
         <li><strong>3/11/2026 (-₹1 Rounding):</strong> Cash ₹2,740 + UPI ₹5,849 = <strong>₹8,589</strong> (likha gaya ₹8,590).</li>
         <li><strong>Duplicate Date (11/11/2026):</strong> Do reports par 11/11/2026 likha hai (ek ₹8,560 aur doosri ₹9,088 jo 12/11/2026 ki hai).</li>
-        <li><strong>Recurring Fixed Expenses:</strong> ₹1,050 (17 din) aur ₹1,000 (13 din) milakar ₹30,850 kharch hua hai.</li>
-      </ul>
-    </div>
-  </section>
-
-  <!-- TAB 3: LEDGER LIST -->
-  <section id="view-ledger" class="hidden p-3.5 space-y-3">
-    <div class="flex items-center justify-between">
-      <h2 class="text-sm font-bold text-yellow-400">All Saved Reports</h2>
-      <button onclick="resetDefaultData()" class="text-[11px] text-rose-400 underline">Reset Nov Data</button>
-    </div>
-    <div id="ledgerList" class="space-y-2.5"></div>
-  </section>
-
-  <!-- PASTE WHATSAPP MODAL -->
-  <div id="pasteModal" class="hidden fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-    <div class="bg-[#111827] border border-slate-700 rounded-2xl w-full max-w-md p-4 space-y-3">
-      <div class="flex justify-between items-center">
-        <h3 class="text-sm font-bold text-yellow-400">Paste WhatsApp Sales Report</h3>
-        <button onclick="closePasteModal()" class="text-slate-400 text-lg font-bold">&times;</button>
-      </div>
-      <p class="text-[11px] text-slate-400">WhatsApp se ek ya ek saath kai Sales Report copy karke neeche paste karein:</p>
-      <textarea id="waPasteInput" rows="7" placeholder="Sales Report&#10;Date 20/ 11/ 2026&#10;Cash 3000₹&#10;UPI 6500₹..." class="w-full bg-[#0b101b] border border-slate-700 rounded-xl p-3 text-xs text-white outline-none focus:border-yellow-400"></textarea>
-      <button onclick="importWhatsAppText()" class="w-full bg-emerald-500 text-slate-950 font-extrabold py-2.5 rounded-xl text-xs">Import & Calculate</button>
-    </div>
-  </div>
-
-  <script>
-    const INITIAL_DATA = [
-      { id: 1, date: "1/11/2026", sender: "Rजे", cash: 2320, upi: 7480, zomato: 0, swiggy: 0, expStr: "650+2700+1250+200", chickenSold: 15, chickenLeft: 0 },
-      { id: 2, date: "2/11/2026", sender: "Azad M", cash: 2390, upi: 6140, zomato: 0, swiggy: 0, expStr: "940+50+80+240+190+1050+1000+2340", chickenSold: 13, chickenLeft: 0 },
-      { id: 3, date: "3/11/2026", sender: "Rजे", cash: 2740, upi: 5849, zomato: 0, swiggy: 0, expStr: "800+50+100+150+50+140+1050+2470+1000", chickenSold: 13, chickenLeft: 0 },
-      { id: 4, date: "4/11/2026", sender: "Rजे", cash: 2140, upi: 6725, zomato: 0, swiggy: 0, expStr: "760+90+200+150+1050+2470+1000+890", chickenSold: 13, chickenLeft: 0 },
-      { id: 5, date: "5/11/2026", sender: "Rजे", cash: 2510, upi: 5531, zomato: 0, swiggy: 0, expStr: "530+1050+2340+1000+180+100+50", chickenSold: 13, chickenLeft: 0 },
-      { id: 6, date: "6/11/2026", sender: "Rजे", cash: 2810, upi: 4708, zomato: 0, swiggy: 0, expStr: "520+1050+2160+750+190+220+100", chickenSold: 12, chickenLeft: 0 },
-      { id: 7, date: "7/11/2026", sender: "Rजे", cash: 2210, upi: 5330, zomato: 0, swiggy: 0, expStr: "510+1050+2160+1250+160+200+50", chickenSold: 12, chickenLeft: 0 },
-      { id: 8, date: "8/11/2026", sender: "Rजे", cash: 2390, upi: 5630, zomato: 0, swiggy: 0, expStr: "610+1050+2160+1000+160+160+200", chickenSold: 12, chickenLeft: 0 },
-      { id: 9, date: "9/11/2026", sender: "Rजे", cash: 1810, upi: 6051, zomato: 0, swiggy: 0, expStr: "500+1050+2160+200+70", chickenSold: 12, chickenLeft: 0 },
-      { id: 10, date: "10/11/2026", sender: "Rजे", cash: 2350, upi: 5559, zomato: 0, swiggy: 0, expStr: "800+1050+2160+1000+200+200+100", chickenSold: 12, chickenLeft: 0 },
-      { id: 11, date: "11/11/2026", sender: "Rजे", cash: 2840, upi: 5720, zomato: 0, swiggy: 0, expStr: "800+200+200+220+100+1000+1050+2520+270", chickenSold: 12, chickenLeft: 0 },
-      { id: 12, date: "11/11/2026 (2)", sender: "Rजे", cash: 3060, upi: 6028, zomato: 0, swiggy: 0, expStr: "750+200+150+120+100+115+60+1050+1250+2380", chickenSold: 14, chickenLeft: 0 },
-      { id: 13, date: "13/11/2026", sender: "Rजे", cash: 3680, upi: 5410, zomato: 0, swiggy: 0, expStr: "640+200+90+160+1050+1000+2380", chickenSold: 14, chickenLeft: 0 },
-      { id: 14, date: "15/11/2026", sender: "Rजे", cash: 2920, upi: 5986, zomato: 0, swiggy: 0, expStr: "710+240+160+1050+1000+2380+70", chickenSold: 14, chickenLeft: 0 },
-      { id: 15, date: "16/11/2026", sender: "Rजे", cash: 3100, upi: 6010, zomato: 0, swiggy: 0, expStr: "930+200+160+1050+1000+2520+250+600+100", chickenSold: 14, chickenLeft: 0 },
-      { id: 16, date: "17/11/2026", sender: "Rजे", cash: 2750, upi: 7054, zomato: 0, swiggy: 0, expStr: "700+1050+2800+1000+240+160+130+100", chickenSold: 14, chickenLeft: 0 },
-      { id: 17, date: "18/11/2026", sender: "Rजे", cash: 3230, upi: 6450, zomato: 0, swiggy: 0, expStr: "770+1050+400+540+1000+3150+120+160+115+50", chickenSold: 15, chickenLeft: 0 },
-      { id: 18, date: "19/11/2026", sender: "Rजे", cash: 2730, upi: 7400, zomato: 0, swiggy: 0, expStr: "740+1050+1000+2850+200+160+150+130", chickenSold: 15, chickenLeft: 0 }
-    ];
-
-    let reports = JSON.parse(localStorage.getItem("ms_sales_reports_v2")) || INITIAL_DATA;
-    let chartInstance = null;
-
-    function sumExp(expStr) {
-      if (!expStr) return 0;
-      return expStr.split("+").map(s => parseFloat(s.replace(/[^\d.]/g, "")) || 0).reduce((a, b) => a + b, 0);
-    }
-
-    function fmtINR(num) {
-      return "₹" + Math.round(num).toLocaleString("en-IN");
-    }
-
-    function computeRow(r) {
-      const rev = (Number(r.cash) || 0) + (Number(r.upi) || 0) + (Number(r.zomato) || 0) + (Number(r.swiggy) || 0);
-      const exp = sumExp(r.expStr);
-      const net = rev - exp;
-      const avg = r.chickenSold > 0 ? Math.round(rev / r.chickenSold) : 0;
-      return { ...r, rev, exp, net, avg };
-    }
-
-    // Dynamic Expense Item Rows
-    function addExpenseRow(amount = "", note = "") {
-      const container = document.getElementById("expenseRowsContainer");
-      const row = document.createElement("div");
-      row.className = "exp-row grid grid-cols-12 gap-2 items-center";
-      row.innerHTML = `
-        <div class="col-span-5">
-          <input type="number" inputmode="numeric" value="${amount}" placeholder="Amount ₹" oninput="updateLivePreview()" class="exp-amt w-full bg-[#0b101b] border border-slate-700/80 rounded-xl px-3 py-2 text-sm text-white focus:border-rose-400 outline-none" />
-        </div>
-        <div class="col-span-6">
-          <input type="text" value="${note}" placeholder="Item note (e.g. Chicken, Oil)" oninput="updateLivePreview()" class="exp-note w-full bg-[#0b101b] border border-slate-700/80 rounded-xl px-3 py-2 text-sm text-slate-200 focus:border-rose-400 outline-none" />
-        </div>
-        <div class="col-span-1 text-right">
-          <button type="button" onclick="this.closest('.exp-row').remove(); updateLivePreview();" class="text-slate-500 hover:text-rose-400 font-bold text-base px-1">&times;</button>
-        </div>
-      `;
-      container.appendChild(row);
-      updateLivePreview();
-    }
-
-    function initDefaultExpenseRows() {
-      const container = document.getElementById("expenseRowsContainer");
-      container.innerHTML = "";
-      addExpenseRow("", "Chicken");
-      addExpenseRow("1050", "Fixed 1");
-      addExpenseRow("1000", "Fixed 2");
-      addExpenseRow("", "");
-    }
-
-    function getFormExpenses() {
-      const rows = document.querySelectorAll("#expenseRowsContainer .exp-row");
-      const amounts = [];
-      const notes = [];
-      rows.forEach(r => {
-        const val = parseFloat(r.querySelector(".exp-amt").value);
-        const note = r.querySelector(".exp-note").value.trim();
-        if (!isNaN(val) && val > 0) {
-          amounts.push(val);
-          notes.push(note ? `${val} (${note})` : `${val}`);
-        }
-      });
-      const formula = amounts.length ? amounts.join("+") : "0";
-      const total = amounts.reduce((a, b) => a + b, 0);
-      return { formula, total, notesStr: notes.join(", ") };
-    }
-
-    function renderKPIs() {
-      const rows = reports.map(computeRow);
-      const totRev = rows.reduce((a, b) => a + b.rev, 0);
-      const totExp = rows.reduce((a, b) => a + b.exp, 0);
-      const totNet = rows.reduce((a, b) => a + b.net, 0);
-      const totUpi = rows.reduce((a, b) => a + Number(b.upi), 0);
-      const totChicken = rows.reduce((a, b) => a + Number(b.chickenSold), 0);
-      const margin = totRev > 0 ? ((totNet / totRev) * 100).toFixed(1) : "0.0";
-      const upiPct = totRev > 0 ? ((totUpi / totRev) * 100).toFixed(1) : "0.0";
-
-      document.getElementById("reportCount").innerText = rows.length;
-      document.getElementById("kpiCards").innerHTML = `
-        <div class="bg-[#111827] border border-slate-800 rounded-2xl p-3">
-          <p class="text-[11px] text-slate-400">Total Revenue (${rows.length}d)</p>
-          <p class="text-lg font-extrabold text-white mt-0.5">${fmtINR(totRev)}</p>
-          <p class="text-[10px] text-emerald-400 mt-0.5">UPI ${upiPct}% • Cash ${(100 - upiPct).toFixed(1)}%</p>
-        </div>
-        <div class="bg-[#111827] border border-slate-800 rounded-2xl p-3">
-          <p class="text-[11px] text-slate-400">Net Profit (${margin}%)</p>
-          <p class="text-lg font-extrabold text-yellow-400 mt-0.5">${fmtINR(totNet)}</p>
-          <p class="text-[10px] text-slate-400 mt-0.5">Avg ${fmtINR(rows.length ? totNet / rows.length : 0)}/day</p>
-        </div>
-        <div class="bg-[#111827] border border-slate-800 rounded-2xl p-3">
-          <p class="text-[11px] text-slate-400">Total Expenses</p>
-          <p class="text-base font-bold text-rose-400 mt-0.5">${fmtINR(totExp)}</p>
-          <p class="text-[10px] text-slate-400 mt-0.5">Avg ${fmtINR(rows.length ? totExp / rows.length : 0)}/day</p>
-        </div>
-        <div class="bg-[#111827] border border-slate-800 rounded-2xl p-3">
-          <p class="text-[11px] text-slate-400">Chicken Sold</p>
-          <p class="text-base font-bold text-sky-400 mt-0.5">${totChicken} kg</p>
-          <p class="text-[10px] text-slate-400 mt-0.5">${fmtINR(totChicken ? totRev / totChicken : 0)} rev/kg</p>
-        </div>
-      `;
-    }
-
-    function formatWhatsAppReport(r) {
-      const c = computeRow(r);
-      const cleanExp = (r.expStr || "0").replace(/\s+/g, "");
-      return `Sales Report\n \nDate       ${r.date}\n\nCash              ${r.cash}₹        \nUPI                 ${r.upi}₹    \nZomato        ${r.zomato}\nSwiggy         ${r.swiggy}   \nExpense  ${cleanExp}=${c.exp.toLocaleString("en-IN")} ₹\n\nTotal   ${c.rev.toLocaleString("en-IN")}-${c.exp}=${c.net.toLocaleString("en-IN")} ₹\n\nChicken Sold               kg${r.chickenSold}\n\nChicken Left                ${r.chickenLeft}kg \n\nAverage                 ${c.avg}₹/kg`;
-    }
-
-    function updateLivePreview() {
-      const expObj = getFormExpenses();
-      document.getElementById("expFormulaText").innerText = expObj.formula;
-      document.getElementById("expTotalText").innerText = fmtINR(expObj.total);
-
-      const draft = {
-        date: document.getElementById("inDate").value || "20/11/2026",
-        sender: document.getElementById("inSender").value || "Rजे",
-        cash: Number(document.getElementById("inCash").value) || 0,
-        upi: Number(document.getElementById("inUpi").value) || 0,
-        zomato: Number(document.getElementById("inZomato").value) || 0,
-        swiggy: Number(document.getElementById("inSwiggy").value) || 0,
-        expStr: expObj.formula,
-        chickenSold: Number(document.getElementById("inChickenSold").value) || 0,
-        chickenLeft: Number(document.getElementById("inChickenLeft").value) || 0
-      };
-      const c = computeRow(draft);
-      document.getElementById("liveRevBadge").innerText = `Total: ${fmtINR(c.rev)}`;
-      document.getElementById("liveNetBadge").innerText = `Net Profit: ${fmtINR(c.net)}`;
-      document.getElementById("inAvg").value = c.avg ? `₹${c.avg}/kg` : "0";
-      document.getElementById("waPreview").innerText = formatWhatsAppReport(draft);
-    }
-
-    function saveReport() {
-      const expObj = getFormExpenses();
-      const newEntry = {
-        id: Date.now(),
-        date: document.getElementById("inDate").value.trim() || "20/11/2026",
-        sender: document.getElementById("inSender").value.trim() || "Rजे",
-        cash: Number(document.getElementById("inCash").value) || 0,
-        upi: Number(document.getElementById("inUpi").value) || 0,
-        zomato: Number(document.getElementById("inZomato").value) || 0,
-        swiggy: Number(document.getElementById("inSwiggy").value) || 0,
-        expStr: expObj.formula,
-        expNotes: expObj.notesStr,
-        chickenSold: Number(document.getElementById("inChickenSold").value) || 0,
-        chickenLeft: Number(document.getElementById("inChickenLeft").value) || 0
-      };
-      reports.push(newEntry);
-      localStorage.setItem("ms_sales_reports_v2", JSON.stringify(reports));
-      renderAll();
-      alert("Report saved successfully!");
-    }
-
-    function resetForm() {
-      document.getElementById("inCash").value = "";
-      document.getElementById("inUpi").value = "";
-      document.getElementById("inZomato").value = "0";
-      document.getElementById("inSwiggy").value = "0";
-      initDefaultExpenseRows();
-      updateLivePreview();
-    }
-
-    function deleteReport(id) {
-      if (!confirm("Delete this report?")) return;
-      reports = reports.filter(r => r.id !== id);
-      localStorage.setItem("ms_sales_reports_v2", JSON.stringify(reports));
-      renderAll();
-    }
-
-    function resetDefaultData() {
-      if (!confirm("Reset to original 18 November reports?")) return;
-      reports = [...INITIAL_DATA];
-      localStorage.setItem("ms_sales_reports_v2", JSON.stringify(reports));
-      renderAll();
-    }
-
-    function copyWhatsAppText() {
-      const txt = document.getElementById("waPreview").innerText;
-      navigator.clipboard.writeText(txt);
-      alert("WhatsApp report copied!");
-    }
-
-    function shareWhatsApp() {
-      const txt = encodeURIComponent(document.getElementById("waPreview").innerText);
-      window.open(`https://wa.me/?text=${txt}`, "_blank");
-    }
-
-    function renderLedger() {
-      const rows = reports.map(computeRow).reverse();
-      document.getElementById("ledgerList").innerHTML = rows.map(r => `
-        <div class="bg-[#111827] border border-slate-800 rounded-2xl p-3.5 space-y-2">
-          <div class="flex justify-between items-center">
-            <div>
-              <span class="text-xs font-extrabold text-yellow-400">${r.date}</span>
-              <span class="text-[11px] text-slate-400 ml-2">by ${r.sender} • ${r.chickenSold} kg</span>
-            </div>
-            <button onclick="deleteReport(${r.id})" class="text-[11px] text-rose-400">Delete</button>
-          </div>
-          <div class="grid grid-cols-3 gap-2 text-center bg-[#0b101b] rounded-xl p-2">
-            <div>
-              <p class="text-[10px] text-slate-400">Revenue</p>
-              <p class="text-xs font-bold text-white">${fmtINR(r.rev)}</p>
-            </div>
-            <div>
-              <p class="text-[10px] text-slate-400">Expense</p>
-              <p class="text-xs font-bold text-rose-400">${fmtINR(r.exp)}</p>
-            </div>
-            <div>
-              <p class="text-[10px] text-slate-400">Net Profit</p>
-              <p class="text-xs font-extrabold text-emerald-400">${fmtINR(r.net)}</p>
-            </div>
-          </div>
-          <p class="text-[11px] text-slate-400 truncate">Cash: ₹${r.cash} | UPI: ₹${r.upi} | Exp: ${r.expNotes || r.expStr}</p>
-        </div>
-      `).join("");
-    }
-
-    function renderChart() {
-      const ctx = document.getElementById("salesChart").getContext("2d");
-      const mode = document.getElementById("chartMode").value;
-      const rows = reports.map(computeRow);
-      const labels = rows.map(r => r.date.replace("/2026", ""));
-
-      if (chartInstance) chartInstance.destroy();
-
-      const datasets = mode === "profit" ? [
-        { label: "Revenue", data: rows.map(r => r.rev), backgroundColor: "#facc15" },
-        { label: "Expense", data: rows.map(r => r.exp), backgroundColor: "#fb7185" },
-        { label: "Net Profit", data: rows.map(r => r.net), backgroundColor: "#34d399" }
-      ] : [
-        { label: "UPI", data: rows.map(r => r.upi), backgroundColor: "#38bdf8" },
-        { label: "Cash", data: rows.map(r => r.cash), backgroundColor: "#fbbf24" }
-      ];
-
-      chartInstance = new Chart(ctx, {
-        type: "bar",
-        data: { labels, datasets },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { labels: { color: "#cbd5e1", font: { size: 11 } } } },
-          scales: {
-            x: { ticks: { color: "#94a3b8", font: { size: 9 } }, grid: { display: false } },
-            y: { ticks: { color: "#94a3b8", font: { size: 10 } }, grid: { color: "#1e293b" } }
-          }
-        }
-      });
-    }
-
-    function switchTab(tab) {
-      ["entry", "charts", "ledger"].forEach(t => {
-        document.getElementById(`view-${t}`).classList.toggle("hidden", t !== tab);
-        const btn = document.getElementById(`tab-${t}`);
-        btn.className = t === tab
-          ? "tab-btn bg-yellow-400 text-slate-950 font-extrabold text-xs px-3.5 py-2 rounded-xl whitespace-nowrap shadow"
-          : "tab-btn bg-[#131b2e] border border-slate-800 text-slate-300 font-semibold text-xs px-3.5 py-2 rounded-xl whitespace-nowrap";
-      });
-      if (tab === "charts") renderChart();
-    }
-
-    function openPasteModal() { document.getElementById("pasteModal").classList.remove("hidden"); }
-    function closePasteModal() { document.getElementById("pasteModal").classList.add("hidden"); }
-
-    function importWhatsAppText() {
-      const raw = document.getElementById("waPasteInput").value;
-      const blocks = raw.split(/Sales Report/i).filter(b => b.trim().length > 10);
-      let added = 0;
-      blocks.forEach(b => {
-        const dateM = b.match(/Date\s+([\d\/\s]+)/i);
-        const cashM = b.match(/Cash\s+(\d+)/i);
-        const upiM = b.match(/UPI\s+(\d+)/i);
-        const expM = b.match(/Expense\s+([\d+\s]+)/i);
-        const chkM = b.match(/Chicken Sold\s+kg\s*(\d+)/i);
-        if (dateM && (cashM || upiM)) {
-          reports.push({
-            id: Date.now() + Math.random(),
-            date: dateM[1].replace(/\s+/g, ""),
-            sender: "WA Import",
-            cash: cashM ? Number(cashM[1]) : 0,
-            upi: upiM ? Number(upiM[1]) : 0,
-            zomato: 0,
-            swiggy: 0,
-            expStr: expM ? expM[1].replace(/\s+/g, "") : "0",
-            chickenSold: chkM ? Number(chkM[1]) : 0,
-            chickenLeft: 0
-          });
-          added++;
-        }
-      });
-      if (added > 0) {
-        localStorage.setItem("ms_sales_reports_v2", JSON.stringify(reports));
-        renderAll();
-        closePasteModal();
-        document.getElementById("waPasteInput").value = "";
-        alert(`${added} report(s) imported!`);
-      } else {
-        alert("Format samajh nahi aaya. Please check Date, Cash, UPI lines.");
-      }
-    }
-
-    function renderAll() {
-      renderKPIs();
-      renderLedger();
-      updateLivePreview();
-    }
-
-    const today = new Date();
-    document.getElementById("inDate").value = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
-    initDefaultExpenseRows();
-    renderAll();
-  </script>
-</body>
-</html>
+        <li><strong>Recurring Fixed Expenses:</strong> ₹1,050 (
