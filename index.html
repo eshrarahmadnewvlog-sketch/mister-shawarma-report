@@ -3,122 +3,172 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Mister Shawarma - Sales & Expense Report</title>
+  <title>Mister Shawarma - Pro Ledger</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #f8fafc; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #090d16; color: #f8fafc; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="pb-24">
-  <!-- Header -->
-  <header class="sticky top-0 z-30 bg-slate-950/95 backdrop-blur border-b border-yellow-500/30 px-4 py-3 flex items-center justify-between">
+<body class="pb-24 max-w-lg mx-auto">
+
+  <!-- Top Header (Pro Ledger Style) -->
+  <header class="sticky top-0 z-30 bg-[#0d1320]/95 backdrop-blur border-b border-slate-800 px-3.5 py-3 flex items-center justify-between gap-2">
     <div class="flex items-center gap-2.5">
-      <div class="w-9 h-9 rounded-xl bg-yellow-400 text-slate-950 font-black flex items-center justify-center text-lg shadow">MS</div>
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-300 to-amber-500 text-slate-950 font-black flex items-center justify-center text-xl shadow-lg shadow-amber-500/20">
+        🌯
+      </div>
       <div>
-        <h1 class="text-base font-extrabold text-yellow-400 leading-tight">MISTER SHAWARMA</h1>
-        <p class="text-[11px] text-slate-400">Daily Sales & Expense Report</p>
+        <div class="flex items-center gap-1.5">
+          <h1 class="text-sm font-extrabold text-white leading-tight">Mister Shawarma</h1>
+          <span class="bg-amber-500/15 border border-amber-400/40 text-amber-300 text-[9px] font-extrabold px-1.5 py-0.5 rounded-md tracking-wide">PRO LEDGER</span>
+        </div>
+        <p class="text-[11px] text-slate-400 leading-tight mt-0.5">Daily Sales, Expense & WhatsApp Report</p>
       </div>
     </div>
-    <button onclick="openPasteModal()" class="bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-semibold px-3 py-1.5 rounded-lg active:scale-95">
-      + Paste WA
-    </button>
+
+    <div class="flex items-center gap-1.5">
+      <button onclick="openPasteModal()" class="bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-amber-300 text-[11px] font-bold px-2.5 py-2 rounded-xl flex items-center gap-1 active:scale-95">
+        <span>📋</span> Paste WA
+      </button>
+      <button onclick="resetForm()" title="Reset Form" class="bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs p-2 rounded-xl active:scale-95">
+        ↺
+      </button>
+    </div>
   </header>
 
-  <!-- KPI Summary Strip -->
-  <section class="p-4 grid grid-cols-2 gap-2.5" id="kpiCards"></section>
+  <!-- KPI Summary Cards -->
+  <section class="px-3.5 pt-3.5 grid grid-cols-2 gap-2.5" id="kpiCards"></section>
 
-  <!-- Tabs -->
-  <nav class="px-4 flex gap-2 border-b border-slate-800 pb-2.5 overflow-x-auto no-scrollbar">
-    <button onclick="switchTab('entry')" id="tab-entry" class="tab-btn bg-yellow-400 text-slate-950 font-bold text-xs px-3.5 py-2 rounded-lg whitespace-nowrap">1. New Report</button>
-    <button onclick="switchTab('charts')" id="tab-charts" class="tab-btn bg-slate-800 text-slate-300 font-semibold text-xs px-3.5 py-2 rounded-lg whitespace-nowrap">2. Charts & Audit</button>
-    <button onclick="switchTab('ledger')" id="tab-ledger" class="tab-btn bg-slate-800 text-slate-300 font-semibold text-xs px-3.5 py-2 rounded-lg whitespace-nowrap">3. All Reports (<span id="reportCount">0</span>)</button>
+  <!-- Navigation Tabs -->
+  <nav class="px-3.5 pt-3.5 flex gap-2 border-b border-slate-800/80 pb-3 overflow-x-auto no-scrollbar">
+    <button onclick="switchTab('entry')" id="tab-entry" class="tab-btn bg-yellow-400 text-slate-950 font-extrabold text-xs px-3.5 py-2 rounded-xl whitespace-nowrap shadow">
+      📝 New Report
+    </button>
+    <button onclick="switchTab('charts')" id="tab-charts" class="tab-btn bg-[#131b2e] border border-slate-800 text-slate-300 font-semibold text-xs px-3.5 py-2 rounded-xl whitespace-nowrap">
+      📊 Charts & Audit
+    </button>
+    <button onclick="switchTab('ledger')" id="tab-ledger" class="tab-btn bg-[#131b2e] border border-slate-800 text-slate-300 font-semibold text-xs px-3.5 py-2 rounded-xl whitespace-nowrap">
+      📒 All Reports (<span id="reportCount">0</span>)
+    </button>
   </nav>
 
-  <!-- TAB 1: NEW REPORT & WHATSAPP GENERATOR -->
-  <main id="view-entry" class="p-4 space-y-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+  <!-- TAB 1: NEW REPORT ENTRY -->
+  <main id="view-entry" class="p-3.5 space-y-4">
+
+    <!-- Section 1: Sales Collection -->
+    <div class="bg-[#111827] border border-slate-800 rounded-2xl p-3.5 space-y-3">
       <div class="flex items-center justify-between">
-        <h2 class="text-sm font-bold text-yellow-400">Aaj Ka Hisab Dalein</h2>
-        <span class="text-[11px] text-slate-400">Auto-calculates Total</span>
+        <h2 class="text-xs font-extrabold text-yellow-400 tracking-wider uppercase">1. Daily Sales (Bikri)</h2>
+        <span id="liveRevBadge" class="text-xs font-bold text-emerald-400">Total: ₹0</span>
       </div>
 
       <div class="grid grid-cols-2 gap-2.5">
         <div>
           <label class="text-[11px] text-slate-400 block mb-1">Date (DD/MM/YYYY)</label>
-          <input id="inDate" type="text" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:border-yellow-400 outline-none" />
+          <input id="inDate" type="text" oninput="updateLivePreview()" class="w-full bg-[#0b101b] border border-slate-700/80 rounded-xl px-3 py-2 text-sm text-white focus:border-yellow-400 outline-none" />
         </div>
         <div>
           <label class="text-[11px] text-slate-400 block mb-1">Staff / Sender</label>
-          <input id="inSender" type="text" value="Rजे" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:border-yellow-400 outline-none" />
+          <input id="inSender" type="text" value="Rजे" oninput="updateLivePreview()" class="w-full bg-[#0b101b] border border-slate-700/80 rounded-xl px-3 py-2 text-sm text-white focus:border-yellow-400 outline-none" />
         </div>
       </div>
 
       <div class="grid grid-cols-2 gap-2.5">
         <div>
           <label class="text-[11px] text-slate-400 block mb-1">Cash (₹)</label>
-          <input id="inCash" type="number" inputmode="numeric" placeholder="0" oninput="updateLivePreview()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:border-yellow-400 outline-none" />
+          <input id="inCash" type="number" inputmode="numeric" placeholder="0" oninput="updateLivePreview()" class="w-full bg-[#0b101b] border border-slate-700/80 rounded-xl px-3 py-2 text-sm text-white focus:border-yellow-400 outline-none" />
         </div>
         <div>
           <label class="text-[11px] text-slate-400 block mb-1">UPI (₹)</label>
-          <input id="inUpi" type="number" inputmode="numeric" placeholder="0" oninput="updateLivePreview()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:border-yellow-400 outline-none" />
+          <input id="inUpi" type="number" inputmode="numeric" placeholder="0" oninput="updateLivePreview()" class="w-full bg-[#0b101b] border border-slate-700/80 rounded-xl px-3 py-2 text-sm text-white focus:border-yellow-400 outline-none" />
         </div>
         <div>
           <label class="text-[11px] text-slate-400 block mb-1">Zomato (₹)</label>
-          <input id="inZomato" type="number" inputmode="numeric" value="0" oninput="updateLivePreview()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:border-yellow-400 outline-none" />
+          <input id="inZomato" type="number" inputmode="numeric" value="0" oninput="updateLivePreview()" class="w-full bg-[#0b101b] border border-slate-700/80 rounded-xl px-3 py-2 text-sm text-white focus:border-yellow-400 outline-none" />
         </div>
         <div>
           <label class="text-[11px] text-slate-400 block mb-1">Swiggy (₹)</label>
-          <input id="inSwiggy" type="number" inputmode="numeric" value="0" oninput="updateLivePreview()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:border-yellow-400 outline-none" />
+          <input id="inSwiggy" type="number" inputmode="numeric" value="0" oninput="updateLivePreview()" class="w-full bg-[#0b101b] border border-slate-700/80 rounded-xl px-3 py-2 text-sm text-white focus:border-yellow-400 outline-none" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: Daily Expenses (Kharcha) with Quick Buttons & Item Notes -->
+    <div class="bg-[#111827] border border-slate-800 rounded-2xl p-3.5 space-y-3">
+      <div class="flex items-center justify-between gap-1.5">
+        <h2 class="text-xs font-extrabold text-rose-400 tracking-wider uppercase leading-tight">2. Daily Expenses<br/>(Kharcha)</h2>
+        <div class="flex items-center gap-1.5">
+          <button type="button" onclick="addExpenseRow(1050, 'Fixed 1')" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-bold px-2.5 py-1.5 rounded-xl active:scale-95">
+            +1050
+          </button>
+          <button type="button" onclick="addExpenseRow(1000, 'Fixed 2')" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-bold px-2.5 py-1.5 rounded-xl active:scale-95">
+            +1000
+          </button>
+          <button type="button" onclick="addExpenseRow('', '')" class="bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-300 text-xs font-bold px-2.5 py-1.5 rounded-xl active:scale-95">
+            + Add Item
+          </button>
         </div>
       </div>
 
-      <div>
-        <label class="text-[11px] text-slate-400 block mb-1">Expense Items (+ se jodein, jaise: 740+1050+1000+2850)</label>
-        <input id="inExp" type="text" placeholder="e.g. 740+1050+1000+2850" oninput="updateLivePreview()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:border-yellow-400 outline-none" />
+      <!-- Dynamic Expense Rows -->
+      <div id="expenseRowsContainer" class="space-y-2"></div>
+
+      <!-- Formula & Total Expense Bar -->
+      <div class="bg-[#0b101b] border border-slate-800 rounded-xl px-3 py-2.5 flex items-center justify-between text-xs">
+        <span class="text-slate-400 truncate max-w-[58%]">Formula: <strong id="expFormulaText" class="text-slate-200 font-mono">0</strong></span>
+        <span class="text-rose-400 font-extrabold">Total Expense: <span id="expTotalText">₹0</span></span>
+      </div>
+    </div>
+
+    <!-- Section 3: Chicken Stock & Net Profit -->
+    <div class="bg-[#111827] border border-slate-800 rounded-2xl p-3.5 space-y-3">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xs font-extrabold text-sky-400 tracking-wider uppercase">3. Chicken Stock & Net</h2>
+        <span id="liveNetBadge" class="text-xs font-extrabold text-yellow-400">Net Profit: ₹0</span>
       </div>
 
       <div class="grid grid-cols-3 gap-2.5">
         <div>
           <label class="text-[11px] text-slate-400 block mb-1">Chicken Sold (kg)</label>
-          <input id="inChickenSold" type="number" inputmode="numeric" value="14" oninput="updateLivePreview()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:border-yellow-400 outline-none" />
+          <input id="inChickenSold" type="number" inputmode="numeric" value="14" oninput="updateLivePreview()" class="w-full bg-[#0b101b] border border-slate-700/80 rounded-xl px-3 py-2 text-sm text-white focus:border-yellow-400 outline-none" />
         </div>
         <div>
           <label class="text-[11px] text-slate-400 block mb-1">Chicken Left (kg)</label>
-          <input id="inChickenLeft" type="number" inputmode="numeric" value="0" oninput="updateLivePreview()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:border-yellow-400 outline-none" />
+          <input id="inChickenLeft" type="number" inputmode="numeric" value="0" oninput="updateLivePreview()" class="w-full bg-[#0b101b] border border-slate-700/80 rounded-xl px-3 py-2 text-sm text-white focus:border-yellow-400 outline-none" />
         </div>
         <div>
           <label class="text-[11px] text-slate-400 block mb-1">Average</label>
-          <input id="inAvg" type="text" placeholder="Auto" readonly class="w-full bg-slate-950/60 border border-slate-800 rounded-xl px-3 py-2 text-sm text-yellow-400 font-semibold outline-none" />
+          <input id="inAvg" type="text" readonly class="w-full bg-[#0b101b]/70 border border-slate-800 rounded-xl px-3 py-2 text-sm text-yellow-400 font-bold outline-none" />
         </div>
       </div>
 
-      <button onclick="saveReport()" class="w-full bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-extrabold py-3 rounded-xl text-sm shadow-lg active:scale-98 transition">
+      <button onclick="saveReport()" class="w-full bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-extrabold py-3 rounded-xl text-sm shadow-lg shadow-yellow-400/10 active:scale-98 transition">
         Save Report in App
       </button>
     </div>
 
-    <!-- Exact WhatsApp Format Preview -->
-    <div class="bg-slate-900 border border-emerald-500/30 rounded-2xl p-4 space-y-3">
+    <!-- Section 4: Exact WhatsApp Format Preview -->
+    <div class="bg-[#111827] border border-emerald-500/30 rounded-2xl p-3.5 space-y-3">
       <div class="flex items-center justify-between">
-        <span class="text-xs font-bold text-emerald-400">WhatsApp Format Preview (Same-to-Same)</span>
+        <span class="text-xs font-bold text-emerald-400">WhatsApp Format Preview</span>
         <div class="flex gap-2">
           <button onclick="copyWhatsAppText()" class="bg-slate-800 text-white text-xs px-3 py-1.5 rounded-lg font-semibold active:scale-95">Copy</button>
-          <button onclick="shareWhatsApp()" class="bg-emerald-500 text-slate-950 text-xs px-3 py-1.5 rounded-lg font-bold active:scale-95">WhatsApp</button>
+          <button onclick="shareWhatsApp()" class="bg-emerald-500 text-slate-950 text-xs px-3 py-1.5 rounded-lg font-extrabold active:scale-95">WhatsApp</button>
         </div>
       </div>
-      <pre id="waPreview" class="bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 whitespace-pre-wrap font-mono leading-relaxed"></pre>
+      <pre id="waPreview" class="bg-[#0b101b] border border-slate-800 rounded-xl p-3 text-xs text-slate-200 whitespace-pre-wrap font-mono leading-relaxed"></pre>
     </div>
   </main>
 
   <!-- TAB 2: CHARTS & AUDIT -->
-  <section id="view-charts" class="hidden p-4 space-y-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+  <section id="view-charts" class="hidden p-3.5 space-y-4">
+    <div class="bg-[#111827] border border-slate-800 rounded-2xl p-3.5">
       <div class="flex items-center justify-between mb-3">
         <h2 class="text-sm font-bold text-yellow-400">Daily Revenue vs Expense vs Net</h2>
-        <select id="chartMode" onchange="renderChart()" class="bg-slate-950 border border-slate-700 text-xs rounded-lg px-2 py-1 text-white">
+        <select id="chartMode" onchange="renderChart()" class="bg-[#0b101b] border border-slate-700 text-xs rounded-lg px-2 py-1 text-white">
           <option value="profit">Profitability</option>
           <option value="payment">Cash vs UPI</option>
         </select>
@@ -128,7 +178,7 @@
       </div>
     </div>
 
-    <div class="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 space-y-2">
+    <div class="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-3.5 space-y-2">
       <h3 class="text-xs font-bold text-amber-400 uppercase tracking-wider">Audit & Calculation Alerts</h3>
       <ul class="text-xs text-slate-300 space-y-1.5 list-disc pl-4">
         <li><strong>17/11/2026 (+₹30 Under-reported):</strong> Cash ₹2,750 + UPI ₹7,054 = <strong>₹9,804</strong> (likha gaya ₹9,774). Actual Net Profit: <strong>₹3,624</strong>.</li>
@@ -139,8 +189,8 @@
     </div>
   </section>
 
-  <!-- TAB 3: LEDGER TABLE -->
-  <section id="view-ledger" class="hidden p-4 space-y-3">
+  <!-- TAB 3: LEDGER LIST -->
+  <section id="view-ledger" class="hidden p-3.5 space-y-3">
     <div class="flex items-center justify-between">
       <h2 class="text-sm font-bold text-yellow-400">All Saved Reports</h2>
       <button onclick="resetDefaultData()" class="text-[11px] text-rose-400 underline">Reset Nov Data</button>
@@ -150,14 +200,14 @@
 
   <!-- PASTE WHATSAPP MODAL -->
   <div id="pasteModal" class="hidden fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md p-4 space-y-3">
+    <div class="bg-[#111827] border border-slate-700 rounded-2xl w-full max-w-md p-4 space-y-3">
       <div class="flex justify-between items-center">
         <h3 class="text-sm font-bold text-yellow-400">Paste WhatsApp Sales Report</h3>
         <button onclick="closePasteModal()" class="text-slate-400 text-lg font-bold">&times;</button>
       </div>
       <p class="text-[11px] text-slate-400">WhatsApp se ek ya ek saath kai Sales Report copy karke neeche paste karein:</p>
-      <textarea id="waPasteInput" rows="7" placeholder="Sales Report&#10;Date 20/ 11/ 2026&#10;Cash 3000₹&#10;UPI 6500₹..." class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs text-white outline-none focus:border-yellow-400"></textarea>
-      <button onclick="importWhatsAppText()" class="w-full bg-emerald-500 text-slate-950 font-bold py-2.5 rounded-xl text-xs">Import & Calculate</button>
+      <textarea id="waPasteInput" rows="7" placeholder="Sales Report&#10;Date 20/ 11/ 2026&#10;Cash 3000₹&#10;UPI 6500₹..." class="w-full bg-[#0b101b] border border-slate-700 rounded-xl p-3 text-xs text-white outline-none focus:border-yellow-400"></textarea>
+      <button onclick="importWhatsAppText()" class="w-full bg-emerald-500 text-slate-950 font-extrabold py-2.5 rounded-xl text-xs">Import & Calculate</button>
     </div>
   </div>
 
@@ -183,7 +233,7 @@
       { id: 18, date: "19/11/2026", sender: "Rजे", cash: 2730, upi: 7400, zomato: 0, swiggy: 0, expStr: "740+1050+1000+2850+200+160+150+130", chickenSold: 15, chickenLeft: 0 }
     ];
 
-    let reports = JSON.parse(localStorage.getItem("ms_sales_reports_v1")) || INITIAL_DATA;
+    let reports = JSON.parse(localStorage.getItem("ms_sales_reports_v2")) || INITIAL_DATA;
     let chartInstance = null;
 
     function sumExp(expStr) {
@@ -203,12 +253,57 @@
       return { ...r, rev, exp, net, avg };
     }
 
+    // Dynamic Expense Item Rows
+    function addExpenseRow(amount = "", note = "") {
+      const container = document.getElementById("expenseRowsContainer");
+      const row = document.createElement("div");
+      row.className = "exp-row grid grid-cols-12 gap-2 items-center";
+      row.innerHTML = `
+        <div class="col-span-5">
+          <input type="number" inputmode="numeric" value="${amount}" placeholder="Amount ₹" oninput="updateLivePreview()" class="exp-amt w-full bg-[#0b101b] border border-slate-700/80 rounded-xl px-3 py-2 text-sm text-white focus:border-rose-400 outline-none" />
+        </div>
+        <div class="col-span-6">
+          <input type="text" value="${note}" placeholder="Item note (e.g. Chicken, Oil)" oninput="updateLivePreview()" class="exp-note w-full bg-[#0b101b] border border-slate-700/80 rounded-xl px-3 py-2 text-sm text-slate-200 focus:border-rose-400 outline-none" />
+        </div>
+        <div class="col-span-1 text-right">
+          <button type="button" onclick="this.closest('.exp-row').remove(); updateLivePreview();" class="text-slate-500 hover:text-rose-400 font-bold text-base px-1">&times;</button>
+        </div>
+      `;
+      container.appendChild(row);
+      updateLivePreview();
+    }
+
+    function initDefaultExpenseRows() {
+      const container = document.getElementById("expenseRowsContainer");
+      container.innerHTML = "";
+      addExpenseRow("", "Chicken");
+      addExpenseRow("1050", "Fixed 1");
+      addExpenseRow("1000", "Fixed 2");
+      addExpenseRow("", "");
+    }
+
+    function getFormExpenses() {
+      const rows = document.querySelectorAll("#expenseRowsContainer .exp-row");
+      const amounts = [];
+      const notes = [];
+      rows.forEach(r => {
+        const val = parseFloat(r.querySelector(".exp-amt").value);
+        const note = r.querySelector(".exp-note").value.trim();
+        if (!isNaN(val) && val > 0) {
+          amounts.push(val);
+          notes.push(note ? `${val} (${note})` : `${val}`);
+        }
+      });
+      const formula = amounts.length ? amounts.join("+") : "0";
+      const total = amounts.reduce((a, b) => a + b, 0);
+      return { formula, total, notesStr: notes.join(", ") };
+    }
+
     function renderKPIs() {
       const rows = reports.map(computeRow);
       const totRev = rows.reduce((a, b) => a + b.rev, 0);
       const totExp = rows.reduce((a, b) => a + b.exp, 0);
       const totNet = rows.reduce((a, b) => a + b.net, 0);
-      const totCash = rows.reduce((a, b) => a + Number(b.cash), 0);
       const totUpi = rows.reduce((a, b) => a + Number(b.upi), 0);
       const totChicken = rows.reduce((a, b) => a + Number(b.chickenSold), 0);
       const margin = totRev > 0 ? ((totNet / totRev) * 100).toFixed(1) : "0.0";
@@ -216,22 +311,22 @@
 
       document.getElementById("reportCount").innerText = rows.length;
       document.getElementById("kpiCards").innerHTML = `
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3">
+        <div class="bg-[#111827] border border-slate-800 rounded-2xl p-3">
           <p class="text-[11px] text-slate-400">Total Revenue (${rows.length}d)</p>
           <p class="text-lg font-extrabold text-white mt-0.5">${fmtINR(totRev)}</p>
           <p class="text-[10px] text-emerald-400 mt-0.5">UPI ${upiPct}% • Cash ${(100 - upiPct).toFixed(1)}%</p>
         </div>
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3">
+        <div class="bg-[#111827] border border-slate-800 rounded-2xl p-3">
           <p class="text-[11px] text-slate-400">Net Profit (${margin}%)</p>
           <p class="text-lg font-extrabold text-yellow-400 mt-0.5">${fmtINR(totNet)}</p>
           <p class="text-[10px] text-slate-400 mt-0.5">Avg ${fmtINR(rows.length ? totNet / rows.length : 0)}/day</p>
         </div>
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3">
+        <div class="bg-[#111827] border border-slate-800 rounded-2xl p-3">
           <p class="text-[11px] text-slate-400">Total Expenses</p>
           <p class="text-base font-bold text-rose-400 mt-0.5">${fmtINR(totExp)}</p>
           <p class="text-[10px] text-slate-400 mt-0.5">Avg ${fmtINR(rows.length ? totExp / rows.length : 0)}/day</p>
         </div>
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3">
+        <div class="bg-[#111827] border border-slate-800 rounded-2xl p-3">
           <p class="text-[11px] text-slate-400">Chicken Sold</p>
           <p class="text-base font-bold text-sky-400 mt-0.5">${totChicken} kg</p>
           <p class="text-[10px] text-slate-400 mt-0.5">${fmtINR(totChicken ? totRev / totChicken : 0)} rev/kg</p>
@@ -246,6 +341,10 @@
     }
 
     function updateLivePreview() {
+      const expObj = getFormExpenses();
+      document.getElementById("expFormulaText").innerText = expObj.formula;
+      document.getElementById("expTotalText").innerText = fmtINR(expObj.total);
+
       const draft = {
         date: document.getElementById("inDate").value || "20/11/2026",
         sender: document.getElementById("inSender").value || "Rजे",
@@ -253,16 +352,19 @@
         upi: Number(document.getElementById("inUpi").value) || 0,
         zomato: Number(document.getElementById("inZomato").value) || 0,
         swiggy: Number(document.getElementById("inSwiggy").value) || 0,
-        expStr: document.getElementById("inExp").value || "0",
+        expStr: expObj.formula,
         chickenSold: Number(document.getElementById("inChickenSold").value) || 0,
         chickenLeft: Number(document.getElementById("inChickenLeft").value) || 0
       };
       const c = computeRow(draft);
+      document.getElementById("liveRevBadge").innerText = `Total: ${fmtINR(c.rev)}`;
+      document.getElementById("liveNetBadge").innerText = `Net Profit: ${fmtINR(c.net)}`;
       document.getElementById("inAvg").value = c.avg ? `₹${c.avg}/kg` : "0";
       document.getElementById("waPreview").innerText = formatWhatsAppReport(draft);
     }
 
     function saveReport() {
+      const expObj = getFormExpenses();
       const newEntry = {
         id: Date.now(),
         date: document.getElementById("inDate").value.trim() || "20/11/2026",
@@ -271,27 +373,37 @@
         upi: Number(document.getElementById("inUpi").value) || 0,
         zomato: Number(document.getElementById("inZomato").value) || 0,
         swiggy: Number(document.getElementById("inSwiggy").value) || 0,
-        expStr: document.getElementById("inExp").value.trim() || "0",
+        expStr: expObj.formula,
+        expNotes: expObj.notesStr,
         chickenSold: Number(document.getElementById("inChickenSold").value) || 0,
         chickenLeft: Number(document.getElementById("inChickenLeft").value) || 0
       };
       reports.push(newEntry);
-      localStorage.setItem("ms_sales_reports_v1", JSON.stringify(reports));
+      localStorage.setItem("ms_sales_reports_v2", JSON.stringify(reports));
       renderAll();
       alert("Report saved successfully!");
+    }
+
+    function resetForm() {
+      document.getElementById("inCash").value = "";
+      document.getElementById("inUpi").value = "";
+      document.getElementById("inZomato").value = "0";
+      document.getElementById("inSwiggy").value = "0";
+      initDefaultExpenseRows();
+      updateLivePreview();
     }
 
     function deleteReport(id) {
       if (!confirm("Delete this report?")) return;
       reports = reports.filter(r => r.id !== id);
-      localStorage.setItem("ms_sales_reports_v1", JSON.stringify(reports));
+      localStorage.setItem("ms_sales_reports_v2", JSON.stringify(reports));
       renderAll();
     }
 
     function resetDefaultData() {
       if (!confirm("Reset to original 18 November reports?")) return;
       reports = [...INITIAL_DATA];
-      localStorage.setItem("ms_sales_reports_v1", JSON.stringify(reports));
+      localStorage.setItem("ms_sales_reports_v2", JSON.stringify(reports));
       renderAll();
     }
 
@@ -309,7 +421,7 @@
     function renderLedger() {
       const rows = reports.map(computeRow).reverse();
       document.getElementById("ledgerList").innerHTML = rows.map(r => `
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 space-y-2">
+        <div class="bg-[#111827] border border-slate-800 rounded-2xl p-3.5 space-y-2">
           <div class="flex justify-between items-center">
             <div>
               <span class="text-xs font-extrabold text-yellow-400">${r.date}</span>
@@ -317,7 +429,7 @@
             </div>
             <button onclick="deleteReport(${r.id})" class="text-[11px] text-rose-400">Delete</button>
           </div>
-          <div class="grid grid-cols-3 gap-2 text-center bg-slate-950 rounded-xl p-2">
+          <div class="grid grid-cols-3 gap-2 text-center bg-[#0b101b] rounded-xl p-2">
             <div>
               <p class="text-[10px] text-slate-400">Revenue</p>
               <p class="text-xs font-bold text-white">${fmtINR(r.rev)}</p>
@@ -331,7 +443,7 @@
               <p class="text-xs font-extrabold text-emerald-400">${fmtINR(r.net)}</p>
             </div>
           </div>
-          <p class="text-[11px] text-slate-400 truncate">Cash: ₹${r.cash} | UPI: ₹${r.upi} | Exp: ${r.expStr}</p>
+          <p class="text-[11px] text-slate-400 truncate">Cash: ₹${r.cash} | UPI: ₹${r.upi} | Exp: ${r.expNotes || r.expStr}</p>
         </div>
       `).join("");
     }
@@ -373,8 +485,8 @@
         document.getElementById(`view-${t}`).classList.toggle("hidden", t !== tab);
         const btn = document.getElementById(`tab-${t}`);
         btn.className = t === tab
-          ? "tab-btn bg-yellow-400 text-slate-950 font-bold text-xs px-3.5 py-2 rounded-lg whitespace-nowrap"
-          : "tab-btn bg-slate-800 text-slate-300 font-semibold text-xs px-3.5 py-2 rounded-lg whitespace-nowrap";
+          ? "tab-btn bg-yellow-400 text-slate-950 font-extrabold text-xs px-3.5 py-2 rounded-xl whitespace-nowrap shadow"
+          : "tab-btn bg-[#131b2e] border border-slate-800 text-slate-300 font-semibold text-xs px-3.5 py-2 rounded-xl whitespace-nowrap";
       });
       if (tab === "charts") renderChart();
     }
@@ -409,7 +521,7 @@
         }
       });
       if (added > 0) {
-        localStorage.setItem("ms_sales_reports_v1", JSON.stringify(reports));
+        localStorage.setItem("ms_sales_reports_v2", JSON.stringify(reports));
         renderAll();
         closePasteModal();
         document.getElementById("waPasteInput").value = "";
@@ -425,9 +537,9 @@
       updateLivePreview();
     }
 
-    // Set today's date default
     const today = new Date();
     document.getElementById("inDate").value = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
+    initDefaultExpenseRows();
     renderAll();
   </script>
 </body>
