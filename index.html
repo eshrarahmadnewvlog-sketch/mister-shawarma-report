@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Mister Shawarma — Live Sales & WhatsApp Reporter</title>
-  <!-- Firebase Compat SDKs for Reliable Single-File GitHub Pages Hosting -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
   <style>
@@ -178,11 +177,11 @@
       transform: scale(0.97);
     }
 
-    /* Tabs */
+    /* 3 Tabs: New Report, History, Deleted */
     .tabs {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
+      grid-template-columns: 1.15fr 1.15fr 0.85fr;
+      gap: 6px;
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 18px;
@@ -194,15 +193,15 @@
       background: transparent;
       border: none;
       color: var(--muted);
-      padding: 11px 10px;
+      padding: 10px 6px;
       border-radius: 13px;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 5px;
       transition: 0.15s ease;
     }
 
@@ -211,17 +210,26 @@
       color: #111;
     }
 
+    .tab-btn.del-tab.active {
+      background: #ef4444;
+      color: #fff;
+    }
+
     .badge-count {
-      background: rgba(0, 0, 0, 0.2);
-      padding: 2px 7px;
+      background: rgba(0, 0, 0, 0.22);
+      padding: 2px 6px;
       border-radius: 999px;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 800;
     }
 
     .tab-btn:not(.active) .badge-count {
       background: var(--card-2);
       color: var(--yellow);
+    }
+
+    .tab-btn.del-tab:not(.active) .badge-count {
+      color: #f87171;
     }
 
     /* Cards & Inputs */
@@ -487,7 +495,7 @@
       cursor: pointer;
     }
 
-    /* History Tab */
+    /* History & Deleted Cards */
     .partner-card {
       background: linear-gradient(145deg, #222014, #18181b);
       border: 1px solid rgba(255, 214, 0, 0.35);
@@ -517,6 +525,11 @@
       margin-bottom: 12px;
     }
 
+    .record-card.deleted-item {
+      border-color: rgba(239, 68, 68, 0.35);
+      background: linear-gradient(160deg, #1b1517, #151518);
+    }
+
     .record-head {
       display: flex;
       justify-content: space-between;
@@ -544,9 +557,25 @@
       border-radius: 999px;
     }
 
+    .deleted-pill {
+      background: rgba(239, 68, 68, 0.16);
+      color: #f87171;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 4px 9px;
+      border-radius: 999px;
+    }
+
     .record-actions {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .record-actions-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
       gap: 8px;
       margin-top: 10px;
     }
@@ -568,19 +597,38 @@
       border-color: var(--yellow);
     }
 
+    .btn-sm.green {
+      background: rgba(34, 197, 94, 0.18);
+      color: var(--green);
+      border-color: rgba(34, 197, 94, 0.35);
+    }
+
     .btn-sm.danger {
       background: rgba(239, 68, 68, 0.14);
       color: #f87171;
       border-color: rgba(239, 68, 68, 0.3);
     }
 
-    .link-reset {
-      background: none;
-      border: none;
-      color: var(--muted);
+    .btn-danger-outline {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      color: #f87171;
+      border-radius: 9px;
+      padding: 5px 9px;
       font-size: 11px;
-      text-decoration: underline;
+      font-weight: 700;
       cursor: pointer;
+    }
+
+    .empty-box {
+      background: var(--card);
+      border: 1px dashed var(--border);
+      border-radius: 16px;
+      padding: 26px 16px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
     }
 
     /* Security Modal */
@@ -716,11 +764,14 @@
       </div>
     </div>
 
-    <!-- Navigation Tabs -->
+    <!-- 3 Navigation Tabs -->
     <div class="tabs">
-      <button id="tabNewBtn" class="tab-btn active" onclick="switchTab('new')">+ New Daily Report</button>
+      <button id="tabNewBtn" class="tab-btn active" onclick="switchTab('new')">+ New Sale</button>
       <button id="tabHistBtn" class="tab-btn" onclick="switchTab('hist')">
-        History & Summary <span id="recordCountBadge" class="badge-count">0</span>
+        Saved <span id="recordCountBadge" class="badge-count">0</span>
+      </button>
+      <button id="tabDelBtn" class="tab-btn del-tab" onclick="switchTab('del')">
+        Delete <span id="deletedCountBadge" class="badge-count">0</span>
       </button>
     </div>
 
@@ -734,7 +785,7 @@
 
         <div class="field">
           <label>Report Date (DD / MM / YYYY)</label>
-          <input type="text" id="inpDate" placeholder="22 / 11 / 2026" oninput="updateLive()" />
+          <input type="text" id="inpDate" placeholder="23 / 11 / 2026" oninput="updateLive()" />
         </div>
 
         <div class="grid-2">
@@ -826,15 +877,15 @@
           <button class="btn-primary" onclick="copyCurrentReport()">Copy Report</button>
           <button class="btn-wa" onclick="shareWhatsApp()">Share on WhatsApp</button>
         </div>
-        <button class="btn-save" onclick="saveDailyRecord()">Save & Sync Live to All Phones</button>
+        <button class="btn-save" onclick="saveDailyRecord()">Save New Sale (Live Sync)</button>
       </div>
     </div>
 
-    <!-- TAB 2: HISTORY & SUMMARY -->
+    <!-- TAB 2: SAVED HISTORY & SUMMARY -->
     <div id="viewHist" class="hidden">
       <div class="card">
         <div class="section-title">
-          <span>Consolidated Performance</span>
+          <span>Active Performance Summary</span>
           <span id="histDaysCount">0 Days</span>
         </div>
 
@@ -881,18 +932,35 @@
       </div>
 
       <div class="section-title" style="padding:0 4px;">
-        <span>SAVED DAILY RECORDS (LIVE)</span>
-        <button class="link-reset" onclick="requestSecurity('reset', null)">Reset Default Nov 18–20</button>
+        <span>SAVED DAILY SALES</span>
+        <button id="deleteAllActiveBtn" class="btn-danger-outline hidden" onclick="requestSecurity('move_all_to_trash', null)">
+          Delete All
+        </button>
       </div>
 
       <div id="recordsContainer"></div>
     </div>
+
+    <!-- TAB 3: DELETE FOLDER (TRASH ARCHIVE) -->
+    <div id="viewDel" class="hidden">
+      <div class="card" style="border-color: rgba(239, 68, 68, 0.35);">
+        <div class="section-title" style="color:#f87171;">
+          <span>Deleted Records Folder</span>
+          <span id="delDaysCount">0 Saved</span>
+        </div>
+        <p style="font-size:12px;color:var(--muted);line-height:1.45;">
+          Jo bhi report aap <strong>Delete</strong> karte hain, wo yahan surakshit save rehti hai aur main hisab se hat jati hai. Zaroorat padne par aap <strong>Restore</strong> karke wapas la sakte hain.
+        </p>
+      </div>
+
+      <div id="deletedContainer"></div>
+    </div>
   </div>
 
-  <!-- Security Modal for Delete / Reset -->
+  <!-- Security Modal for Delete / Permanent Delete -->
   <div id="securityModal" class="modal-backdrop">
     <div class="modal-box">
-      <div class="modal-title">Security Verification Required</div>
+      <div class="modal-title" id="modalTitleText">Security Verification Required</div>
       <div class="modal-desc" id="modalActionDesc">Record delete karne ke liye registered mobile number aur password dalein.</div>
 
       <div class="field">
@@ -912,7 +980,7 @@
 
       <div class="modal-actions">
         <button class="btn-ghost" onclick="closeSecurityModal()">Cancel</button>
-        <button class="btn-primary" onclick="confirmSecurityAction()">Verify & Delete</button>
+        <button class="btn-primary" id="secConfirmBtn" onclick="confirmSecurityAction()">Verify & Delete</button>
       </div>
     </div>
   </div>
@@ -920,13 +988,12 @@
   <div id="toast" class="toast">Synced!</div>
 
   <script>
-    // 1. Credentials & Isolated Firebase Node (Bill app se bilkul alag path)
     const AUTH_PHONE = "8881544782";
     const AUTH_PASS = "Eshrar@";
-    const SESSION_KEY = "ms_report_logged_in_v1";
-    const LOCAL_BACKUP_KEY = "mister_shawarma_records_v1";
+    const SESSION_KEY = "ms_report_logged_in_v3";
+    const LOCAL_ACTIVE_KEY = "mister_shawarma_active_v3";
+    const LOCAL_TRASH_KEY = "mister_shawarma_trash_v3";
 
-    // From your google-services.json (project_id: rj-billing-app)
     const firebaseConfig = {
       apiKey: "AIzaSyDM06RpXjspQnYx5uD_JKwnkQDvffJMRy4",
       authDomain: "rj-billing-app.firebaseapp.com",
@@ -939,78 +1006,13 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    // Dedicated separate folder so Billing App data is never touched
-    const reportsRef = db.ref("mister_shawarma_daily_reports");
 
-    const DEFAULT_RECORDS = [
-      {
-        id: "rec_18_11_2026",
-        date: "18/ 11/ 2026",
-        cash: 3230,
-        upi: 6450,
-        zomato: 0,
-        swiggy: 0,
-        chickenSold: 15,
-        chickenLeft: 0,
-        createdAt: 1731888000000,
-        expenses: [
-          { name: "Oil + bh", amount: 770 },
-          { name: "Rom + B + M", amount: 1050 },
-          { name: "Building wala", amount: 400 },
-          { name: "Gas", amount: 540 },
-          { name: "Roti", amount: 1000 },
-          { name: "Chicken", amount: 3150 },
-          { name: "Khana", amount: 120 },
-          { name: "Porter", amount: 160 },
-          { name: "Oil (extra)", amount: 115 },
-          { name: "Tissue paper", amount: 50 }
-        ]
-      },
-      {
-        id: "rec_19_11_2026",
-        date: "19/ 11/ 2026",
-        cash: 2730,
-        upi: 7400,
-        zomato: 0,
-        swiggy: 0,
-        chickenSold: 15,
-        chickenLeft: 0,
-        createdAt: 1731974400000,
-        expenses: [
-          { name: "Oil + bh", amount: 740 },
-          { name: "Rom + B + M", amount: 1050 },
-          { name: "Roti", amount: 1000 },
-          { name: "Chicken", amount: 2850 },
-          { name: "Expense 5", amount: 200 },
-          { name: "Porter", amount: 160 },
-          { name: "Expense 7", amount: 150 },
-          { name: "Expense 8", amount: 130 }
-        ]
-      },
-      {
-        id: "rec_20_11_2026",
-        date: "20/ 11/ 2026",
-        cash: 3420,
-        upi: 6949,
-        zomato: 0,
-        swiggy: 0,
-        chickenSold: 17,
-        chickenLeft: 0,
-        createdAt: 1732060800000,
-        expenses: [
-          { name: "Oil + bh", amount: 710 },
-          { name: "Rom + B + M", amount: 1050 },
-          { name: "Roti", amount: 1000 },
-          { name: "Chicken", amount: 3060 },
-          { name: "Expense 5", amount: 240 },
-          { name: "Porter", amount: 180 },
-          { name: "Expense 7", amount: 100 },
-          { name: "Expense 8", amount: 100 }
-        ]
-      }
-    ];
+    // Two isolated folders inside Firebase (completely separate from Billing App)
+    const activeRef = db.ref("mister_shawarma_daily_reports");
+    const deletedRef = db.ref("mister_shawarma_deleted_reports");
 
     let records = [];
+    let deletedRecords = [];
     let currentExpenses = [];
     let editingRecordId = null;
     let pendingSecurityAction = { type: null, id: null };
@@ -1024,7 +1026,7 @@
       const t = document.getElementById("toast");
       t.textContent = msg;
       t.classList.add("show");
-      setTimeout(() => t.classList.remove("show"), 2300);
+      setTimeout(() => t.classList.remove("show"), 2400);
     }
 
     function toggleInputEye(inputId, btn) {
@@ -1038,7 +1040,6 @@
       }
     }
 
-    /* Full App Login Gate */
     function handleAppLogin(e) {
       e.preventDefault();
       const phone = document.getElementById("loginPhone").value.trim();
@@ -1071,19 +1072,34 @@
       }
     }
 
-    /* Real-time Sync across all phones */
-    function startLiveSync() {
-      // Load local cache instantly while cloud connects
-      const cached = localStorage.getItem(LOCAL_BACKUP_KEY);
-      if (cached) {
-        try {
-          records = JSON.parse(cached);
-          updateRecordBadges();
-          renderHistory();
-        } catch (e) {}
-      }
+    function normalizeSnapshot(val, sortField) {
+      if (!val) return [];
+      const arr = Object.keys(val).map((key) => ({
+        ...val[key],
+        id: key,
+        expenses: Array.isArray(val[key].expenses)
+          ? val[key].expenses
+          : val[key].expenses
+          ? Object.values(val[key].expenses)
+          : []
+      }));
+      arr.sort((a, b) => (b[sortField] || b.createdAt || 0) - (a[sortField] || a.createdAt || 0));
+      return arr;
+    }
 
-      // Monitor Firebase connection status
+    function startLiveSync() {
+      // Load cached lists instantly
+      try {
+        const cActive = localStorage.getItem(LOCAL_ACTIVE_KEY);
+        if (cActive) records = JSON.parse(cActive);
+        const cTrash = localStorage.getItem(LOCAL_TRASH_KEY);
+        if (cTrash) deletedRecords = JSON.parse(cTrash);
+        updateRecordBadges();
+        renderHistory();
+        renderDeleted();
+      } catch (e) {}
+
+      // Connection status indicator
       db.ref(".info/connected").on("value", (snap) => {
         const dot = document.getElementById("syncDot");
         const txt = document.getElementById("syncText");
@@ -1100,48 +1116,35 @@
         }
       });
 
-      // Listen to live changes in mister_shawarma_daily_reports
-      reportsRef.on(
+      // 1. Live Listener for Active Saved Reports (NEVER auto-adds old defaults)
+      activeRef.on(
         "value",
         (snapshot) => {
-          const val = snapshot.val();
-          if (!val) {
-            // Seed initial Nov 18-20 records once if cloud folder is empty
-            const initialObj = {};
-            DEFAULT_RECORDS.forEach((r) => {
-              initialObj[r.id] = r;
-            });
-            reportsRef.set(initialObj);
-            return;
-          }
-
-          const arr = Object.keys(val).map((key) => ({
-            ...val[key],
-            id: key,
-            expenses: Array.isArray(val[key].expenses)
-              ? val[key].expenses
-              : val[key].expenses
-              ? Object.values(val[key].expenses)
-              : []
-          }));
-
-          // Sort newest first
-          arr.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-          records = arr;
-          localStorage.setItem(LOCAL_BACKUP_KEY, JSON.stringify(records));
+          records = normalizeSnapshot(snapshot.val(), "createdAt");
+          localStorage.setItem(LOCAL_ACTIVE_KEY, JSON.stringify(records));
           updateRecordBadges();
           renderHistory();
         },
-        (error) => {
+        () => {
           document.getElementById("syncText").style.color = "#f87171";
-          document.getElementById("syncText").textContent = "DB Rule Permission Error";
+          document.getElementById("syncText").textContent = "Firebase Rules Blocked!";
           showToast("Firebase Rules check karein!");
         }
       );
+
+      // 2. Live Listener for Deleted / Trash Folder
+      deletedRef.on("value", (snapshot) => {
+        deletedRecords = normalizeSnapshot(snapshot.val(), "deletedAt");
+        localStorage.setItem(LOCAL_TRASH_KEY, JSON.stringify(deletedRecords));
+        updateRecordBadges();
+        renderDeleted();
+      });
     }
 
     function updateRecordBadges() {
       document.getElementById("recordCountBadge").textContent = records.length;
+      document.getElementById("deletedCountBadge").textContent = deletedRecords.length;
+      document.getElementById("deleteAllActiveBtn").classList.toggle("hidden", records.length === 0);
     }
 
     function setTodayDate() {
@@ -1153,12 +1156,16 @@
     }
 
     function switchTab(tab) {
-      const isNew = tab === "new";
-      document.getElementById("viewNew").classList.toggle("hidden", !isNew);
-      document.getElementById("viewHist").classList.toggle("hidden", isNew);
-      document.getElementById("tabNewBtn").classList.toggle("active", isNew);
-      document.getElementById("tabHistBtn").classList.toggle("active", !isNew);
-      if (!isNew) renderHistory();
+      document.getElementById("viewNew").classList.toggle("hidden", tab !== "new");
+      document.getElementById("viewHist").classList.toggle("hidden", tab !== "hist");
+      document.getElementById("viewDel").classList.toggle("hidden", tab !== "del");
+
+      document.getElementById("tabNewBtn").classList.toggle("active", tab === "new");
+      document.getElementById("tabHistBtn").classList.toggle("active", tab === "hist");
+      document.getElementById("tabDelBtn").classList.toggle("active", tab === "del");
+
+      if (tab === "hist") renderHistory();
+      if (tab === "del") renderDeleted();
     }
 
     function quickSelect(name) {
@@ -1314,21 +1321,22 @@ Average      ₹${s.avgKg}/kg`;
         updatedAt: Date.now()
       };
 
-      reportsRef
+      activeRef
         .child(id)
         .set(payload)
         .then(() => {
           editingRecordId = null;
           document.getElementById("editingBadge").classList.add("hidden");
-          showToast("Live Synced to All Phones!");
+          clearForm(true);
+          showToast("New Sale Saved & Synced Live!");
           switchTab("hist");
         })
         .catch(() => {
-          showToast("Sync error! Internet ya Firebase rules check karein.");
+          showToast("Save Error! Firebase Rules check karein.");
         });
     }
 
-    function clearForm() {
+    function clearForm(silent) {
       editingRecordId = null;
       document.getElementById("editingBadge").classList.add("hidden");
       setTodayDate();
@@ -1341,7 +1349,7 @@ Average      ₹${s.avgKg}/kg`;
       currentExpenses = [];
       renderExpenses();
       updateLive();
-      showToast("Form Cleared");
+      if (!silent) showToast("Form Cleared");
     }
 
     function loadRecordToEdit(id) {
@@ -1365,8 +1373,9 @@ Average      ₹${s.avgKg}/kg`;
       showToast("Loaded for Editing");
     }
 
-    function copySavedWA(id) {
-      const rec = records.find((r) => r.id === id);
+    function copySavedWA(id, fromDeleted) {
+      const list = fromDeleted ? deletedRecords : records;
+      const rec = list.find((r) => r.id === id);
       if (!rec) return;
       const totalSales = (rec.cash || 0) + (rec.upi || 0) + (rec.zomato || 0) + (rec.swiggy || 0);
       const totalExp = (rec.expenses || []).reduce((a, b) => a + b.amount, 0);
@@ -1380,7 +1389,7 @@ Average      ₹${s.avgKg}/kg`;
         netProfit,
         avgKg
       });
-      navigator.clipboard.writeText(text).then(() => showToast("Saved Report Copied!"));
+      navigator.clipboard.writeText(text).then(() => showToast("WhatsApp Report Copied!"));
     }
 
     function renderHistory() {
@@ -1392,29 +1401,112 @@ Average      ₹${s.avgKg}/kg`;
       let totChicken = 0;
 
       const container = document.getElementById("recordsContainer");
-      container.innerHTML = records
+
+      if (records.length === 0) {
+        container.innerHTML = `<div class="empty-box">Abhi koi active sale save nahi hai.<br/><strong>+ New Sale</strong> tab me jakar aaj ki report save karein.</div>`;
+      } else {
+        container.innerHTML = records
+          .map((rec) => {
+            const sales = (rec.cash || 0) + (rec.upi || 0) + (rec.zomato || 0) + (rec.swiggy || 0);
+            const exp = (rec.expenses || []).reduce((a, b) => a + b.amount, 0);
+            const net = sales - exp;
+            const margin = sales > 0 ? ((net / sales) * 100).toFixed(1) : "0.0";
+            const avgKg = rec.chickenSold > 0 ? Math.round(sales / rec.chickenSold) : 0;
+
+            totSales += sales;
+            totExp += exp;
+            totNet += net;
+            totCash += rec.cash || 0;
+            totUpi += rec.upi || 0;
+            totChicken += rec.chickenSold || 0;
+
+            return `
+              <div class="record-card">
+                <div class="record-head">
+                  <div>
+                    <div class="record-date">${rec.date}</div>
+                    <div class="record-sub">Chicken: ${rec.chickenSold} kg • Avg: ₹${fmtNum(avgKg)}/kg</div>
+                  </div>
+                  <span class="margin-pill">${margin}% Margin</span>
+                </div>
+
+                <div class="kpi-grid">
+                  <div class="kpi-box">
+                    <span>Sales</span>
+                    <strong class="text-green">₹${fmtNum(sales)}</strong>
+                  </div>
+                  <div class="kpi-box">
+                    <span>Expense</span>
+                    <strong class="text-red">₹${fmtNum(exp)}</strong>
+                  </div>
+                  <div class="kpi-box">
+                    <span>Net Profit</span>
+                    <strong class="text-yellow">₹${fmtNum(net)}</strong>
+                  </div>
+                </div>
+
+                <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);">
+                  <span>Cash: ₹${fmtNum(rec.cash)}</span>
+                  <span>UPI: ₹${fmtNum(rec.upi)}</span>
+                  <span>${(rec.expenses || []).length} expense items</span>
+                </div>
+
+                <div class="record-actions">
+                  <button class="btn-sm" onclick="loadRecordToEdit('${rec.id}')">Edit / Load</button>
+                  <button class="btn-sm yellow" onclick="copySavedWA('${rec.id}', false)">Copy WA</button>
+                  <button class="btn-sm danger" onclick="requestSecurity('move_to_trash', '${rec.id}')">Delete</button>
+                </div>
+              </div>
+            `;
+          })
+          .join("");
+      }
+
+      const partnerShare = totNet / 4;
+      const overallAvgKg = totChicken > 0 ? Math.round(totSales / totChicken) : 0;
+
+      document.getElementById("histDaysCount").textContent = `${records.length} Days`;
+      document.getElementById("totSales").textContent = `₹${fmtNum(totSales)}`;
+      document.getElementById("totExp").textContent = `₹${fmtNum(totExp)}`;
+      document.getElementById("totNet").textContent = `₹${fmtNum(totNet)}`;
+      document.getElementById("totCash").textContent = `₹${fmtNum(totCash)}`;
+      document.getElementById("totUpi").textContent = `₹${fmtNum(totUpi)}`;
+      document.getElementById("partnerEach").textContent = `₹${partnerShare.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
+      document.getElementById("totChicken").textContent = `${totChicken} kg`;
+      document.getElementById("totAvgKg").textContent = `₹${fmtNum(overallAvgKg)}`;
+    }
+
+    function renderDeleted() {
+      const container = document.getElementById("deletedContainer");
+      document.getElementById("delDaysCount").textContent = `${deletedRecords.length} Saved`;
+
+      if (deletedRecords.length === 0) {
+        container.innerHTML = `<div class="empty-box">Delete folder khali hai.<br/>Jab aap kisi record ko <strong>Delete</strong> karenge, wo yahan save ho jayega.</div>`;
+        return;
+      }
+
+      container.innerHTML = deletedRecords
         .map((rec) => {
           const sales = (rec.cash || 0) + (rec.upi || 0) + (rec.zomato || 0) + (rec.swiggy || 0);
           const exp = (rec.expenses || []).reduce((a, b) => a + b.amount, 0);
           const net = sales - exp;
-          const margin = sales > 0 ? ((net / sales) * 100).toFixed(1) : "0.0";
-          const avgKg = rec.chickenSold > 0 ? Math.round(sales / rec.chickenSold) : 0;
-
-          totSales += sales;
-          totExp += exp;
-          totNet += net;
-          totCash += rec.cash || 0;
-          totUpi += rec.upi || 0;
-          totChicken += rec.chickenSold || 0;
+          const delTime = rec.deletedAt
+            ? new Date(rec.deletedAt).toLocaleString("en-IN", {
+                day: "2-digit",
+                month: "short",
+                hour: "2-digit",
+                minute: "2-digit"
+              })
+            : "Deleted";
 
           return `
-            <div class="record-card">
+            <div class="record-card deleted-item">
               <div class="record-head">
                 <div>
                   <div class="record-date">${rec.date}</div>
-                  <div class="record-sub">Chicken: ${rec.chickenSold} kg • Avg: ₹${fmtNum(avgKg)}/kg</div>
+                  <div class="record-sub">Chicken: ${rec.chickenSold} kg • Deleted: ${delTime}</div>
                 </div>
-                <span class="margin-pill">${margin}% Margin</span>
+                <span class="deleted-pill">In Delete Folder</span>
               </div>
 
               <div class="kpi-grid">
@@ -1432,47 +1524,60 @@ Average      ₹${s.avgKg}/kg`;
                 </div>
               </div>
 
-              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);">
-                <span>Cash: ₹${fmtNum(rec.cash)}</span>
-                <span>UPI: ₹${fmtNum(rec.upi)}</span>
-                <span>${(rec.expenses || []).length} expense items</span>
-              </div>
-
               <div class="record-actions">
-                <button class="btn-sm" onclick="loadRecordToEdit('${rec.id}')">Edit / Load</button>
-                <button class="btn-sm yellow" onclick="copySavedWA('${rec.id}')">Copy WA</button>
-                <button class="btn-sm danger" onclick="requestSecurity('delete', '${rec.id}')">Delete</button>
+                <button class="btn-sm green" onclick="restoreFromTrash('${rec.id}')">Restore</button>
+                <button class="btn-sm yellow" onclick="copySavedWA('${rec.id}', true)">Copy WA</button>
+                <button class="btn-sm danger" onclick="requestSecurity('perm_delete', '${rec.id}')">Remove</button>
               </div>
             </div>
           `;
         })
         .join("");
-
-      const partnerShare = totNet / 4;
-      const overallAvgKg = totChicken > 0 ? Math.round(totSales / totChicken) : 0;
-
-      document.getElementById("histDaysCount").textContent = `${records.length} Days`;
-      document.getElementById("totSales").textContent = `₹${fmtNum(totSales)}`;
-      document.getElementById("totExp").textContent = `₹${fmtNum(totExp)}`;
-      document.getElementById("totNet").textContent = `₹${fmtNum(totNet)}`;
-      document.getElementById("totCash").textContent = `₹${fmtNum(totCash)}`;
-      document.getElementById("totUpi").textContent = `₹${fmtNum(totUpi)}`;
-      document.getElementById("partnerEach").textContent = `₹${partnerShare.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
-      document.getElementById("totChicken").textContent = `${totChicken} kg`;
-      document.getElementById("totAvgKg").textContent = `₹${fmtNum(overallAvgKg)}`;
     }
 
-    /* Security Verification for Delete / Reset */
+    function restoreFromTrash(id) {
+      const rec = deletedRecords.find((r) => r.id === id);
+      if (!rec) return;
+
+      const cleanRec = { ...rec };
+      delete cleanRec.deletedAt;
+
+      activeRef
+        .child(id)
+        .set(cleanRec)
+        .then(() => deletedRef.child(id).remove())
+        .then(() => {
+          showToast("Restored to Saved Sales!");
+          switchTab("hist");
+        })
+        .catch(() => showToast("Restore Error!"));
+    }
+
+    /* Security Verification for Move to Delete Folder / Permanent Remove */
     function requestSecurity(type, id) {
       pendingSecurityAction = { type, id };
       document.getElementById("secPhone").value = "";
       document.getElementById("secPass").value = "";
       document.getElementById("secPass").type = "password";
       document.getElementById("secError").textContent = "";
-      document.getElementById("modalActionDesc").textContent =
-        type === "reset"
-          ? "Default Nov 18–20 records reset karne ke liye number aur password dalein."
-          : "Record delete karne ke liye registered mobile number aur password dalein.";
+
+      if (type === "move_to_trash") {
+        document.getElementById("modalTitleText").textContent = "Delete & Move to Delete Folder";
+        document.getElementById("modalActionDesc").textContent =
+          "Ye record Saved hisab se hat kar Delete folder me save ho jayega. Number aur password dalein:";
+        document.getElementById("secConfirmBtn").textContent = "Verify & Delete";
+      } else if (type === "move_all_to_trash") {
+        document.getElementById("modalTitleText").textContent = "Delete All Saved Records";
+        document.getElementById("modalActionDesc").textContent =
+          "Saare purane records hat kar Delete folder me save ho jayenge. Number aur password dalein:";
+        document.getElementById("secConfirmBtn").textContent = "Delete All to Folder";
+      } else if (type === "perm_delete") {
+        document.getElementById("modalTitleText").textContent = "Permanent Remove";
+        document.getElementById("modalActionDesc").textContent =
+          "Delete folder se hamesha ke liye hatane ke liye number aur password dalein:";
+        document.getElementById("secConfirmBtn").textContent = "Remove Permanently";
+      }
+
       document.getElementById("securityModal").classList.add("open");
     }
 
@@ -1486,31 +1591,44 @@ Average      ₹${s.avgKg}/kg`;
       const pass = document.getElementById("secPass").value;
 
       if (phone !== AUTH_PHONE || pass !== AUTH_PASS) {
-        document.getElementById("secError").textContent = "Galat Number ya Password! Delete cancel kiya gaya.";
+        document.getElementById("secError").textContent = "Galat Number ya Password! Cancel kiya gaya.";
         return;
       }
 
-      if (pendingSecurityAction.type === "delete" && pendingSecurityAction.id) {
-        reportsRef
-          .child(pendingSecurityAction.id)
-          .remove()
-          .then(() => showToast("Deleted from All Phones!"))
-          .catch(() => showToast("Delete error!"));
-      } else if (pendingSecurityAction.type === "reset") {
-        const resetObj = {};
-        DEFAULT_RECORDS.forEach((r) => {
-          resetObj[r.id] = r;
-        });
-        reportsRef
-          .set(resetObj)
-          .then(() => showToast("Default Nov 18–20 Restored Live!"))
-          .catch(() => showToast("Reset error!"));
-      }
-
+      const actionType = pendingSecurityAction.type;
+      const targetId = pendingSecurityAction.id;
       closeSecurityModal();
+
+      if (actionType === "move_to_trash" && targetId) {
+        const rec = records.find((r) => r.id === targetId);
+        if (!rec) return;
+        const trashPayload = { ...rec, deletedAt: Date.now() };
+        deletedRef
+          .child(targetId)
+          .set(trashPayload)
+          .then(() => activeRef.child(targetId).remove())
+          .then(() => showToast("Deleted! Saved in Delete Tab."))
+          .catch(() => showToast("Delete Error! Firebase Rules check karein."));
+      } else if (actionType === "move_all_to_trash") {
+        const batchTrash = {};
+        const now = Date.now();
+        records.forEach((r, i) => {
+          batchTrash[r.id] = { ...r, deletedAt: now + i };
+        });
+        deletedRef
+          .update(batchTrash)
+          .then(() => activeRef.remove())
+          .then(() => showToast("All Old Records Moved to Delete Folder!"))
+          .catch(() => showToast("Delete All Error!"));
+      } else if (actionType === "perm_delete" && targetId) {
+        deletedRef
+          .child(targetId)
+          .remove()
+          .then(() => showToast("Removed from Delete Folder!"))
+          .catch(() => showToast("Remove Error!"));
+      }
     }
 
-    // Boot
     setTodayDate();
     renderExpenses();
     updateLive();
