@@ -232,6 +232,64 @@
       color: #f87171;
     }
 
+    /* WhatsApp Paste Banner */
+    .wa-paste-bar {
+      background: linear-gradient(145deg, #10241b, #151c19);
+      border: 1px solid rgba(37, 211, 102, 0.4);
+      border-radius: 16px;
+      padding: 12px;
+      margin-bottom: 14px;
+    }
+
+    .wa-paste-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .btn-wa-paste {
+      background: #25d366;
+      color: #0b141a;
+      border: none;
+      border-radius: 11px;
+      padding: 9px 12px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .btn-wa-paste:active {
+      transform: scale(0.97);
+    }
+
+    .wa-paste-drawer {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(37, 211, 102, 0.2);
+    }
+
+    textarea.wa-input {
+      width: 100%;
+      min-height: 115px;
+      background: #0b141a;
+      border: 1px solid #263840;
+      color: #e9edef;
+      border-radius: 12px;
+      padding: 10px;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 12px;
+      line-height: 1.4;
+      outline: none;
+      resize: vertical;
+      margin-bottom: 8px;
+    }
+
+    textarea.wa-input:focus {
+      border-color: #25d366;
+    }
+
     /* Cards & Inputs */
     .card {
       background: var(--card);
@@ -731,7 +789,7 @@
             autocorrect="off"
             autocapitalize="off"
             spellcheck="false"
-            placeholder="8881544782"
+            placeholder="Enter mobile number"
           />
         </div>
 
@@ -739,15 +797,15 @@
           <label>Password</label>
           <div class="pass-wrap">
             <input
-              type="text"
+              type="password"
               id="loginPass"
               autocomplete="off"
               autocorrect="off"
               autocapitalize="off"
               spellcheck="false"
-              placeholder="Eshrar@"
+              placeholder="Enter password"
             />
-            <button type="button" class="toggle-eye" onclick="togglePassMask('loginPass', this)">Hide</button>
+            <button type="button" class="toggle-eye" onclick="togglePassMask('loginPass', this)">Show</button>
           </div>
         </div>
 
@@ -756,12 +814,6 @@
         <button type="button" onclick="handleAppLogin()" class="btn-primary" style="width:100%;margin-top:12px;font-size:15px;">
           Login & Open Live Report
         </button>
-
-        <div style="text-align:center;margin-top:14px;">
-          <button type="button" onclick="quickFillOwner()" style="background:none;border:none;color:var(--muted);font-size:11px;text-decoration:underline;cursor:pointer;">
-            Auto-Fill ID & Password
-          </button>
-        </div>
       </div>
     </div>
   </div>
@@ -799,6 +851,34 @@
 
     <!-- TAB 1: NEW DAILY REPORT -->
     <div id="viewNew">
+
+      <!-- ONE-TAP WHATSAPP PASTE & AUTO-FILL -->
+      <div class="wa-paste-bar">
+        <div class="wa-paste-top">
+          <div>
+            <div style="font-size:12px;font-weight:800;color:#25d366;">WHATSAPP MESSAGE IMPORT</div>
+            <div style="font-size:11px;color:var(--muted);">Copy karke seedha auto-fill karein</div>
+          </div>
+          <button type="button" class="btn-wa-paste" onclick="pasteFromWhatsAppSmart()">
+            Paste from WhatsApp
+          </button>
+        </div>
+
+        <div id="waPasteDrawer" class="wa-paste-drawer hidden">
+          <textarea
+            id="waPasteBox"
+            class="wa-input"
+            placeholder="Yahan WhatsApp ka Sales Report ya Daily Expense Report paste karein..."
+          ></textarea>
+          <div class="action-grid" style="margin-bottom:0;">
+            <button type="button" class="btn-ghost" onclick="closePasteDrawer()">Close</button>
+            <button type="button" class="btn-wa" onclick="parseWhatsAppText(document.getElementById('waPasteBox').value)">
+              Auto-Fill Form
+            </button>
+          </div>
+        </div>
+      </div>
+
       <div class="card">
         <div class="section-title">
           <span>1. Sales & Chicken Stock</span>
@@ -987,14 +1067,14 @@
 
       <div class="field">
         <label>Registered Mobile Number</label>
-        <input type="text" inputmode="numeric" id="secPhone" autocomplete="off" placeholder="8881544782" />
+        <input type="text" inputmode="numeric" id="secPhone" autocomplete="off" placeholder="Enter mobile number" />
       </div>
 
       <div class="field">
         <label>Password</label>
         <div class="pass-wrap">
-          <input type="text" id="secPass" autocomplete="off" placeholder="Eshrar@" />
-          <button type="button" class="toggle-eye" onclick="togglePassMask('secPass', this)">Hide</button>
+          <input type="password" id="secPass" autocomplete="off" placeholder="Enter password" />
+          <button type="button" class="toggle-eye" onclick="togglePassMask('secPass', this)">Show</button>
         </div>
       </div>
 
@@ -1012,9 +1092,9 @@
   <script>
     const AUTH_PHONE = "8881544782";
     const AUTH_PASS = "eshrar@";
-    const SESSION_KEY = "ms_report_logged_in_v6";
-    const LOCAL_ACTIVE_KEY = "mister_shawarma_active_v6";
-    const LOCAL_TRASH_KEY = "mister_shawarma_trash_v6";
+    const SESSION_KEY = "ms_report_logged_in_v8";
+    const LOCAL_ACTIVE_KEY = "mister_shawarma_active_v8";
+    const LOCAL_TRASH_KEY = "mister_shawarma_trash_v8";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDM06RpXjspQnYx5uD_JKwnkQDvffJMRy4",
@@ -1067,7 +1147,7 @@
       const t = document.getElementById("toast");
       t.textContent = msg;
       t.classList.add("show");
-      setTimeout(() => t.classList.remove("show"), 2400);
+      setTimeout(() => t.classList.remove("show"), 2500);
     }
 
     function togglePassMask(inputId, btn) {
@@ -1081,12 +1161,6 @@
       }
     }
 
-    function quickFillOwner() {
-      document.getElementById("loginPhone").value = "8881544782";
-      document.getElementById("loginPass").value = "Eshrar@";
-      document.getElementById("loginError").textContent = "";
-    }
-
     function handleAppLogin() {
       const phone = normalizeDigits(document.getElementById("loginPhone").value);
       const pass = normalizePass(document.getElementById("loginPass").value);
@@ -1097,7 +1171,7 @@
         localStorage.setItem(SESSION_KEY, "true");
         openAppAfterLogin();
       } else {
-        err.textContent = `Entered: "${phone}" / "${document.getElementById("loginPass").value.trim()}" — Sahi ID 8881544782 aur Password Eshrar@ dalein.`;
+        err.textContent = "Galat Number ya Password! Sahi details dalein.";
       }
     }
 
@@ -1105,6 +1179,7 @@
       localStorage.removeItem(SESSION_KEY);
       document.getElementById("appScreen").classList.add("hidden");
       document.getElementById("loginScreen").classList.remove("hidden");
+      document.getElementById("loginPhone").value = "";
       document.getElementById("loginPass").value = "";
       showToast("Logged Out");
     }
@@ -1115,6 +1190,138 @@
       if (!firebaseStarted) {
         firebaseStarted = true;
         startLiveSync();
+      }
+    }
+
+    /* WHATSAPP CLIPBOARD AUTO-IMPORT PARSER */
+    async function pasteFromWhatsAppSmart() {
+      const drawer = document.getElementById("waPasteDrawer");
+      const box = document.getElementById("waPasteBox");
+
+      try {
+        if (navigator.clipboard && navigator.clipboard.readText) {
+          const clipText = await navigator.clipboard.readText();
+          if (clipText && clipText.trim().length > 5) {
+            box.value = clipText.trim();
+            parseWhatsAppText(clipText);
+            return;
+          }
+        }
+      } catch (e) {
+        // Fallback for iOS Safari clipboard permission: open paste box cleanly
+      }
+
+      drawer.classList.remove("hidden");
+      box.value = "";
+      box.focus();
+      showToast("Box me Paste karke Auto-Fill dabayein");
+    }
+
+    function closePasteDrawer() {
+      document.getElementById("waPasteDrawer").classList.add("hidden");
+    }
+
+    function parseWhatsAppText(rawText) {
+      const text = String(rawText || "").trim();
+      if (!text) {
+        showToast("Pehle WhatsApp message paste karein");
+        return;
+      }
+
+      let matchedAnything = false;
+
+      // 1. Check if it's an itemized Daily Expense Report (e.g. "1. Chikan: 3150₹")
+      const isExpenseOnly = /daily\s*expense/i.test(text) && !/cash\s+\d/i.test(text);
+
+      // Extract Date (e.g., "18/ 11/ 2026" or "18/11/26")
+      const dateMatch = text.match(/Date\s*:?\s*([0-9]{1,2}\s*\/\s*[0-9]{1,2}\s*\/\s*[0-9]{2,4})/i);
+      if (dateMatch && !isExpenseOnly) {
+        document.getElementById("inpDate").value = dateMatch[1].replace(/\s*\/\s*/g, "/ ");
+        matchedAnything = true;
+      }
+
+      // Extract Cash, UPI, Zomato, Swiggy
+      const cashMatch = text.match(/Cash\s*:?\s*([0-9,]+)/i);
+      if (cashMatch) {
+        document.getElementById("inpCash").value = cashMatch[1].replace(/,/g, "");
+        matchedAnything = true;
+      }
+
+      const upiMatch = text.match(/UPI\s*:?\s*([0-9,]+)/i);
+      if (upiMatch) {
+        document.getElementById("inpUpi").value = upiMatch[1].replace(/,/g, "");
+        matchedAnything = true;
+      }
+
+      const zomatoMatch = text.match(/Zomato\s*:?\s*([0-9,]+)/i);
+      if (zomatoMatch) {
+        document.getElementById("inpZomato").value = zomatoMatch[1].replace(/,/g, "");
+        matchedAnything = true;
+      }
+
+      const swiggyMatch = text.match(/Swiggy\s*:?\s*([0-9,]+)/i);
+      if (swiggyMatch) {
+        document.getElementById("inpSwiggy").value = swiggyMatch[1].replace(/,/g, "");
+        matchedAnything = true;
+      }
+
+      // Extract Chicken Sold (handles both "kg15" and "15kg" or "15 kg")
+      const soldMatch = text.match(/Chicken\s*Sold\s*:?\s*(?:kg\s*)?([0-9.]+)\s*(?:kg)?/i);
+      if (soldMatch) {
+        document.getElementById("inpChickenSold").value = soldMatch[1];
+        matchedAnything = true;
+      }
+
+      // Extract Chicken Left (handles both "0kg" and "kg0")
+      const leftMatch = text.match(/Chicken\s*Left\s*:?\s*(?:kg\s*)?([0-9.]+)\s*(?:kg)?/i);
+      if (leftMatch) {
+        document.getElementById("inpChickenLeft").value = leftMatch[1];
+        matchedAnything = true;
+      }
+
+      // 2. Extract Expenses:
+      // Case A: Chain format like "770+1050+400+540=7,355"
+      const chainMatch = text.match(/([0-9]+(?:\.[0-9]+)?(?:\s*\+\s*[0-9]+(?:\.[0-9]+)?)+)\s*=/);
+      if (chainMatch) {
+        const nums = chainMatch[1]
+          .split("+")
+          .map((n) => parseFloat(n.trim()))
+          .filter((n) => !isNaN(n) && n > 0);
+        if (nums.length > 0) {
+          currentExpenses = nums.map((amt, i) => ({
+            name: `Expense ${i + 1}`,
+            amount: amt
+          }));
+          matchedAnything = true;
+        }
+      } else {
+        // Case B: Numbered list format like "1. Chikan: 3150₹" or "3.Rom + B + M . 1050₹"
+        const lines = text.split(/\r?\n/);
+        const parsedItems = [];
+        lines.forEach((line) => {
+          if (/total/i.test(line) || /date/i.test(line) || /outlet/i.test(line)) return;
+          const m = line.match(/^\s*\d+[\.\)]\s*([^\d\n:₹]+?)\s*[:.\-]?\s*([0-9,]+)\s*₹?\s*$/);
+          if (m) {
+            const itemName = m[1].replace(/\.+$/, "").trim();
+            const itemAmt = parseFloat(m[2].replace(/,/g, ""));
+            if (itemName && itemAmt > 0) {
+              parsedItems.push({ name: itemName, amount: itemAmt });
+            }
+          }
+        });
+        if (parsedItems.length > 0) {
+          currentExpenses = parsedItems;
+          matchedAnything = true;
+        }
+      }
+
+      if (matchedAnything) {
+        renderExpenses();
+        updateLive();
+        closePasteDrawer();
+        showToast("WhatsApp Report Auto-Filled!");
+      } else {
+        showToast("Format samajh nahi aaya, sahi report paste karein");
       }
     }
 
