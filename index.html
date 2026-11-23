@@ -1017,12 +1017,12 @@
           </div>
         </div>
 
-        <!-- 4-Partner Split -->
+        <!-- 2-Partner Split (50% - 50%) -->
         <div class="partner-card">
           <div class="partner-top">
             <div>
-              <div style="font-size:12px;font-weight:800;color:var(--yellow);">4-PARTNER PROFIT SPLIT</div>
-              <div style="font-size:11px;color:var(--muted);">Equal share per partner (25%)</div>
+              <div style="font-size:12px;font-weight:800;color:var(--yellow);">2-PARTNER PROFIT SPLIT</div>
+              <div style="font-size:11px;color:var(--muted);">Equal share per partner (50%)</div>
             </div>
             <div id="partnerEach" class="partner-share">₹0</div>
           </div>
@@ -1207,9 +1207,7 @@
             return;
           }
         }
-      } catch (e) {
-        // Fallback for iOS Safari clipboard permission: open paste box cleanly
-      }
+      } catch (e) {}
 
       drawer.classList.remove("hidden");
       box.value = "";
@@ -1229,18 +1227,14 @@
       }
 
       let matchedAnything = false;
-
-      // 1. Check if it's an itemized Daily Expense Report (e.g. "1. Chikan: 3150₹")
       const isExpenseOnly = /daily\s*expense/i.test(text) && !/cash\s+\d/i.test(text);
 
-      // Extract Date (e.g., "18/ 11/ 2026" or "18/11/26")
       const dateMatch = text.match(/Date\s*:?\s*([0-9]{1,2}\s*\/\s*[0-9]{1,2}\s*\/\s*[0-9]{2,4})/i);
       if (dateMatch && !isExpenseOnly) {
         document.getElementById("inpDate").value = dateMatch[1].replace(/\s*\/\s*/g, "/ ");
         matchedAnything = true;
       }
 
-      // Extract Cash, UPI, Zomato, Swiggy
       const cashMatch = text.match(/Cash\s*:?\s*([0-9,]+)/i);
       if (cashMatch) {
         document.getElementById("inpCash").value = cashMatch[1].replace(/,/g, "");
@@ -1265,22 +1259,18 @@
         matchedAnything = true;
       }
 
-      // Extract Chicken Sold (handles both "kg15" and "15kg" or "15 kg")
       const soldMatch = text.match(/Chicken\s*Sold\s*:?\s*(?:kg\s*)?([0-9.]+)\s*(?:kg)?/i);
       if (soldMatch) {
         document.getElementById("inpChickenSold").value = soldMatch[1];
         matchedAnything = true;
       }
 
-      // Extract Chicken Left (handles both "0kg" and "kg0")
       const leftMatch = text.match(/Chicken\s*Left\s*:?\s*(?:kg\s*)?([0-9.]+)\s*(?:kg)?/i);
       if (leftMatch) {
         document.getElementById("inpChickenLeft").value = leftMatch[1];
         matchedAnything = true;
       }
 
-      // 2. Extract Expenses:
-      // Case A: Chain format like "770+1050+400+540=7,355"
       const chainMatch = text.match(/([0-9]+(?:\.[0-9]+)?(?:\s*\+\s*[0-9]+(?:\.[0-9]+)?)+)\s*=/);
       if (chainMatch) {
         const nums = chainMatch[1]
@@ -1295,7 +1285,6 @@
           matchedAnything = true;
         }
       } else {
-        // Case B: Numbered list format like "1. Chikan: 3150₹" or "3.Rom + B + M . 1050₹"
         const lines = text.split(/\r?\n/);
         const parsedItems = [];
         lines.forEach((line) => {
@@ -1725,7 +1714,8 @@ Average      ₹${s.avgKg}/kg`;
           .join("");
       }
 
-      const partnerShare = totNet / 4;
+      // 2-Partner equal split (50% each)
+      const partnerShare = totNet / 2;
       const overallAvgKg = totChicken > 0 ? Math.round(totSales / totChicken) : 0;
 
       document.getElementById("histDaysCount").textContent = `${records.length} Days`;
