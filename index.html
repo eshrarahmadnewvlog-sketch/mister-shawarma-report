@@ -720,26 +720,49 @@
       <div class="login-title">MISTER <span>SHAWARMA</span></div>
       <div class="login-sub">Live Cloud Sales & Expense Portal</div>
 
-      <form onsubmit="handleAppLogin(event)">
+      <div>
         <div class="field">
           <label>Mobile Number (Login ID)</label>
-          <input type="tel" id="loginPhone" placeholder="Enter 10-digit mobile number" maxlength="10" required />
+          <input
+            type="text"
+            inputmode="numeric"
+            id="loginPhone"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
+            placeholder="8881544782"
+          />
         </div>
 
         <div class="field">
           <label>Password</label>
           <div class="pass-wrap">
-            <input type="password" id="loginPass" placeholder="Enter password" required />
-            <button type="button" class="toggle-eye" onclick="toggleInputEye('loginPass', this)">Show</button>
+            <input
+              type="text"
+              id="loginPass"
+              autocomplete="off"
+              autocorrect="off"
+              autocapitalize="off"
+              spellcheck="false"
+              placeholder="Eshrar@"
+            />
+            <button type="button" class="toggle-eye" onclick="togglePassMask('loginPass', this)">Hide</button>
           </div>
         </div>
 
         <div id="loginError" class="error-msg"></div>
 
-        <button type="submit" class="btn-primary" style="width:100%;margin-top:12px;font-size:15px;">
+        <button type="button" onclick="handleAppLogin()" class="btn-primary" style="width:100%;margin-top:12px;font-size:15px;">
           Login & Open Live Report
         </button>
-      </form>
+
+        <div style="text-align:center;margin-top:14px;">
+          <button type="button" onclick="quickFillOwner()" style="background:none;border:none;color:var(--muted);font-size:11px;text-decoration:underline;cursor:pointer;">
+            Auto-Fill ID & Password
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -835,4 +858,841 @@
         </div>
 
         <div class="exp-add-row">
-          <input type
+          <input type="text" id="inpExpName" placeholder="Item name" />
+          <input type="number" id="inpExpAmt" placeholder="₹ Amount" />
+          <button class="btn-add" onclick="addExpenseItem()">Add</button>
+        </div>
+
+        <div id="expList" class="exp-list"></div>
+      </div>
+
+      <!-- Live Summary & WhatsApp Output -->
+      <div class="card">
+        <div class="section-title">
+          <span>3. Live P&L & WhatsApp Report</span>
+          <span id="liveMarginBadge" class="text-green">0.0% Margin</span>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi-box">
+            <span>Total Sales</span>
+            <strong id="kpiSales" class="text-green">₹0</strong>
+          </div>
+          <div class="kpi-box">
+            <span>Total Expense</span>
+            <strong id="kpiExp" class="text-red">₹0</strong>
+          </div>
+          <div class="kpi-box">
+            <span>Net Profit</span>
+            <strong id="kpiNet" class="text-yellow">₹0</strong>
+          </div>
+        </div>
+
+        <div class="meta-strip">
+          <span>Avg Sales / kg: <strong id="kpiAvgKg" class="text-text">₹0</strong></span>
+          <span>Net / kg: <strong id="kpiNetKg" class="text-yellow">₹0</strong></span>
+        </div>
+
+        <div id="waPreview" class="wa-box"></div>
+
+        <div class="action-grid">
+          <button class="btn-primary" onclick="copyCurrentReport()">Copy Report</button>
+          <button class="btn-wa" onclick="shareWhatsApp()">Share on WhatsApp</button>
+        </div>
+        <button id="saveSaleBtn" class="btn-save" onclick="saveDailyRecord()">Save New Sale (Live Sync)</button>
+      </div>
+    </div>
+
+    <!-- TAB 2: SAVED HISTORY & SUMMARY -->
+    <div id="viewHist" class="hidden">
+      <div class="card">
+        <div class="section-title">
+          <span>Active Performance Summary</span>
+          <span id="histDaysCount">0 Days</span>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi-box">
+            <span>Total Sales</span>
+            <strong id="totSales" class="text-green">₹0</strong>
+          </div>
+          <div class="kpi-box">
+            <span>Total Expense</span>
+            <strong id="totExp" class="text-red">₹0</strong>
+          </div>
+          <div class="kpi-box">
+            <span>Net Profit</span>
+            <strong id="totNet" class="text-yellow">₹0</strong>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="kpi-box">
+            <span>Total Cash Pool</span>
+            <strong id="totCash">₹0</strong>
+          </div>
+          <div class="kpi-box">
+            <span>Total UPI Pool</span>
+            <strong id="totUpi">₹0</strong>
+          </div>
+        </div>
+
+        <!-- 4-Partner Split -->
+        <div class="partner-card">
+          <div class="partner-top">
+            <div>
+              <div style="font-size:12px;font-weight:800;color:var(--yellow);">4-PARTNER PROFIT SPLIT</div>
+              <div style="font-size:11px;color:var(--muted);">Equal share per partner (25%)</div>
+            </div>
+            <div id="partnerEach" class="partner-share">₹0</div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);">
+            <span>Total Chicken: <strong id="totChicken" style="color:var(--text)">0 kg</strong></span>
+            <span>Avg Sales/kg: <strong id="totAvgKg" style="color:var(--text)">₹0</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title" style="padding:0 4px;">
+        <span>SAVED DAILY SALES</span>
+        <button id="deleteAllActiveBtn" class="btn-danger-outline hidden" onclick="requestSecurity('move_all_to_trash', null)">
+          Delete All
+        </button>
+      </div>
+
+      <div id="recordsContainer"></div>
+    </div>
+
+    <!-- TAB 3: DELETE FOLDER (TRASH ARCHIVE) -->
+    <div id="viewDel" class="hidden">
+      <div class="card" style="border-color: rgba(239, 68, 68, 0.35);">
+        <div class="section-title" style="color:#f87171;">
+          <span>Deleted Records Folder</span>
+          <span id="delDaysCount">0 Saved</span>
+        </div>
+        <p style="font-size:12px;color:var(--muted);line-height:1.45;">
+          Jo bhi report aap <strong>Delete</strong> karte hain, wo yahan surakshit save rehti hai aur main hisab se hat jati hai. Zaroorat padne par aap <strong>Restore</strong> karke wapas la sakte hain.
+        </p>
+      </div>
+
+      <div id="deletedContainer"></div>
+    </div>
+  </div>
+
+  <!-- Security Modal for Delete / Permanent Delete -->
+  <div id="securityModal" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-title" id="modalTitleText">Security Verification Required</div>
+      <div class="modal-desc" id="modalActionDesc">Record delete karne ke liye registered mobile number aur password dalein.</div>
+
+      <div class="field">
+        <label>Registered Mobile Number</label>
+        <input type="text" inputmode="numeric" id="secPhone" autocomplete="off" placeholder="8881544782" />
+      </div>
+
+      <div class="field">
+        <label>Password</label>
+        <div class="pass-wrap">
+          <input type="text" id="secPass" autocomplete="off" placeholder="Eshrar@" />
+          <button type="button" class="toggle-eye" onclick="togglePassMask('secPass', this)">Hide</button>
+        </div>
+      </div>
+
+      <div id="secError" class="error-msg"></div>
+
+      <div class="modal-actions">
+        <button class="btn-ghost" onclick="closeSecurityModal()">Cancel</button>
+        <button class="btn-primary" id="secConfirmBtn" onclick="confirmSecurityAction()">Verify & Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast">Synced!</div>
+
+  <script>
+    const AUTH_PHONE = "8881544782";
+    const AUTH_PASS = "eshrar@";
+    const SESSION_KEY = "ms_report_logged_in_v6";
+    const LOCAL_ACTIVE_KEY = "mister_shawarma_active_v6";
+    const LOCAL_TRASH_KEY = "mister_shawarma_trash_v6";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDM06RpXjspQnYx5uD_JKwnkQDvffJMRy4",
+      authDomain: "rj-billing-app.firebaseapp.com",
+      databaseURL: "https://rj-billing-app-default-rtdb.firebaseio.com",
+      projectId: "rj-billing-app",
+      storageBucket: "rj-billing-app.firebasestorage.app",
+      messagingSenderId: "803051421708",
+      appId: "1:803051421708:android:d9a6ad2aec87d4c349ee29"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const activeRef = db.ref("mister_shawarma_daily_reports");
+    const deletedRef = db.ref("mister_shawarma_deleted_reports");
+
+    let records = [];
+    let deletedRecords = [];
+    let currentExpenses = [];
+    let editingRecordId = null;
+    let isSaving = false;
+    let pendingSecurityAction = { type: null, id: null };
+    let firebaseStarted = false;
+
+    function normalizeDigits(str) {
+      const hindiMap = { "०":"0","१":"1","२":"2","३":"3","४":"4","५":"5","६":"6","७":"7","८":"8","९":"9" };
+      return String(str || "")
+        .replace(/[०-९]/g, (d) => hindiMap[d])
+        .replace(/\D/g, "");
+    }
+
+    function normalizePass(str) {
+      return String(str || "").trim().toLowerCase();
+    }
+
+    function fmtNum(n) {
+      return Number(n || 0).toLocaleString("en-IN");
+    }
+
+    function makeDateId(dateStr) {
+      const cleaned = (dateStr || "")
+        .replace(/[^a-zA-Z0-9]/g, "_")
+        .replace(/_+/g, "_")
+        .replace(/^_|_$/g, "");
+      return cleaned ? "date_" + cleaned : "rec_" + Date.now();
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      setTimeout(() => t.classList.remove("show"), 2400);
+    }
+
+    function togglePassMask(inputId, btn) {
+      const inp = document.getElementById(inputId);
+      if (inp.type === "password") {
+        inp.type = "text";
+        btn.textContent = "Hide";
+      } else {
+        inp.type = "password";
+        btn.textContent = "Show";
+      }
+    }
+
+    function quickFillOwner() {
+      document.getElementById("loginPhone").value = "8881544782";
+      document.getElementById("loginPass").value = "Eshrar@";
+      document.getElementById("loginError").textContent = "";
+    }
+
+    function handleAppLogin() {
+      const phone = normalizeDigits(document.getElementById("loginPhone").value);
+      const pass = normalizePass(document.getElementById("loginPass").value);
+      const err = document.getElementById("loginError");
+
+      if (phone === AUTH_PHONE && pass === AUTH_PASS) {
+        err.textContent = "";
+        localStorage.setItem(SESSION_KEY, "true");
+        openAppAfterLogin();
+      } else {
+        err.textContent = `Entered: "${phone}" / "${document.getElementById("loginPass").value.trim()}" — Sahi ID 8881544782 aur Password Eshrar@ dalein.`;
+      }
+    }
+
+    function logoutApp() {
+      localStorage.removeItem(SESSION_KEY);
+      document.getElementById("appScreen").classList.add("hidden");
+      document.getElementById("loginScreen").classList.remove("hidden");
+      document.getElementById("loginPass").value = "";
+      showToast("Logged Out");
+    }
+
+    function openAppAfterLogin() {
+      document.getElementById("loginScreen").classList.add("hidden");
+      document.getElementById("appScreen").classList.remove("hidden");
+      if (!firebaseStarted) {
+        firebaseStarted = true;
+        startLiveSync();
+      }
+    }
+
+    function normalizeSnapshot(val, sortField) {
+      if (!val) return [];
+      const arr = Object.keys(val).map((key) => ({
+        ...val[key],
+        id: key,
+        expenses: Array.isArray(val[key].expenses)
+          ? val[key].expenses
+          : val[key].expenses
+          ? Object.values(val[key].expenses)
+          : []
+      }));
+      arr.sort((a, b) => (b[sortField] || b.createdAt || 0) - (a[sortField] || a.createdAt || 0));
+      return arr;
+    }
+
+    function startLiveSync() {
+      try {
+        const cActive = localStorage.getItem(LOCAL_ACTIVE_KEY);
+        if (cActive) records = JSON.parse(cActive);
+        const cTrash = localStorage.getItem(LOCAL_TRASH_KEY);
+        if (cTrash) deletedRecords = JSON.parse(cTrash);
+        updateRecordBadges();
+        renderHistory();
+        renderDeleted();
+      } catch (e) {}
+
+      db.ref(".info/connected").on("value", (snap) => {
+        const dot = document.getElementById("syncDot");
+        const txt = document.getElementById("syncText");
+        if (snap.val() === true) {
+          dot.style.background = "#22c55e";
+          dot.style.boxShadow = "0 0 6px #22c55e";
+          txt.style.color = "#22c55e";
+          txt.textContent = "Live Sync ON (All Phones)";
+        } else {
+          dot.style.background = "#f59e0b";
+          dot.style.boxShadow = "none";
+          txt.style.color = "#f59e0b";
+          txt.textContent = "Offline / Reconnecting...";
+        }
+      });
+
+      activeRef.on(
+        "value",
+        (snapshot) => {
+          records = normalizeSnapshot(snapshot.val(), "createdAt");
+          localStorage.setItem(LOCAL_ACTIVE_KEY, JSON.stringify(records));
+          updateRecordBadges();
+          renderHistory();
+        },
+        () => {
+          document.getElementById("syncText").style.color = "#f87171";
+          document.getElementById("syncText").textContent = "Firebase Rules Blocked!";
+          showToast("Firebase Rules check karein!");
+        }
+      );
+
+      deletedRef.on("value", (snapshot) => {
+        deletedRecords = normalizeSnapshot(snapshot.val(), "deletedAt");
+        localStorage.setItem(LOCAL_TRASH_KEY, JSON.stringify(deletedRecords));
+        updateRecordBadges();
+        renderDeleted();
+      });
+    }
+
+    function updateRecordBadges() {
+      document.getElementById("recordCountBadge").textContent = records.length;
+      document.getElementById("deletedCountBadge").textContent = deletedRecords.length;
+      document.getElementById("deleteAllActiveBtn").classList.toggle("hidden", records.length === 0);
+    }
+
+    function setTodayDate() {
+      const d = new Date();
+      const dd = String(d.getDate()).padStart(2, "0");
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const yyyy = d.getFullYear();
+      document.getElementById("inpDate").value = `${dd}/ ${mm}/ ${yyyy}`;
+    }
+
+    function switchTab(tab) {
+      document.getElementById("viewNew").classList.toggle("hidden", tab !== "new");
+      document.getElementById("viewHist").classList.toggle("hidden", tab !== "hist");
+      document.getElementById("viewDel").classList.toggle("hidden", tab !== "del");
+
+      document.getElementById("tabNewBtn").classList.toggle("active", tab === "new");
+      document.getElementById("tabHistBtn").classList.toggle("active", tab === "hist");
+      document.getElementById("tabDelBtn").classList.toggle("active", tab === "del");
+
+      if (tab === "hist") renderHistory();
+      if (tab === "del") renderDeleted();
+    }
+
+    function quickSelect(name) {
+      document.getElementById("inpExpName").value = name;
+      document.getElementById("inpExpAmt").focus();
+    }
+
+    function addExpenseItem() {
+      const nameInp = document.getElementById("inpExpName");
+      const amtInp = document.getElementById("inpExpAmt");
+      const name = nameInp.value.trim() || `Item ${currentExpenses.length + 1}`;
+      const amount = parseFloat(amtInp.value);
+
+      if (!amount || amount <= 0) {
+        showToast("Valid amount dalein");
+        return;
+      }
+
+      currentExpenses.push({ name, amount });
+      nameInp.value = "";
+      amtInp.value = "";
+      renderExpenses();
+      updateLive();
+    }
+
+    function removeExpenseItem(idx) {
+      currentExpenses.splice(idx, 1);
+      renderExpenses();
+      updateLive();
+    }
+
+    function renderExpenses() {
+      const list = document.getElementById("expList");
+      document.getElementById("expCountLabel").textContent = `${currentExpenses.length} items`;
+      list.innerHTML = currentExpenses
+        .map(
+          (item, idx) => `
+          <div class="exp-item">
+            <span class="exp-item-left">${idx + 1}. ${item.name}</span>
+            <div class="exp-item-right">
+              <span class="exp-amt">₹${fmtNum(item.amount)}</span>
+              <button class="btn-del-item" onclick="removeExpenseItem(${idx})">×</button>
+            </div>
+          </div>
+        `
+        )
+        .join("");
+    }
+
+    function getFormState() {
+      const date = document.getElementById("inpDate").value.trim() || "Date N/A";
+      const cash = parseFloat(document.getElementById("inpCash").value) || 0;
+      const upi = parseFloat(document.getElementById("inpUpi").value) || 0;
+      const zomato = parseFloat(document.getElementById("inpZomato").value) || 0;
+      const swiggy = parseFloat(document.getElementById("inpSwiggy").value) || 0;
+      const chickenSold = parseFloat(document.getElementById("inpChickenSold").value) || 0;
+      const chickenLeft = parseFloat(document.getElementById("inpChickenLeft").value) || 0;
+
+      const totalSales = cash + upi + zomato + swiggy;
+      const totalExp = currentExpenses.reduce((acc, x) => acc + x.amount, 0);
+      const netProfit = totalSales - totalExp;
+      const margin = totalSales > 0 ? ((netProfit / totalSales) * 100).toFixed(1) : "0.0";
+      const avgKg = chickenSold > 0 ? Math.round(totalSales / chickenSold) : 0;
+      const netKg = chickenSold > 0 ? Math.round(netProfit / chickenSold) : 0;
+
+      return {
+        date,
+        cash,
+        upi,
+        zomato,
+        swiggy,
+        chickenSold,
+        chickenLeft,
+        expenses: [...currentExpenses],
+        totalSales,
+        totalExp,
+        netProfit,
+        margin,
+        avgKg,
+        netKg
+      };
+    }
+
+    function buildWhatsAppText(s) {
+      const expChain =
+        s.expenses.length > 0
+          ? `${s.expenses.map((e) => e.amount).join("+")}=${fmtNum(s.totalExp)}`
+          : "0";
+
+      return `Sales Report
+ 
+Date       ${s.date}
+
+Cash               ${s.cash}₹    
+UPI                   ${s.upi}₹
+Zomato        ${s.zomato}
+Swiggy         ${s.swiggy}   
+Expense        
+${expChain} 
+
+
+Total   ${fmtNum(s.totalSales)}-${s.totalExp}=${fmtNum(s.netProfit)} 
+
+Chicken Sold               kg${s.chickenSold}
+
+Chicken Left                ${s.chickenLeft}kg 
+
+Average      ₹${s.avgKg}/kg`;
+    }
+
+    function updateLive() {
+      const s = getFormState();
+      document.getElementById("kpiSales").textContent = `₹${fmtNum(s.totalSales)}`;
+      document.getElementById("kpiExp").textContent = `₹${fmtNum(s.totalExp)}`;
+      document.getElementById("kpiNet").textContent = `₹${fmtNum(s.netProfit)}`;
+      document.getElementById("kpiAvgKg").textContent = `₹${fmtNum(s.avgKg)}`;
+      document.getElementById("kpiNetKg").textContent = `₹${fmtNum(s.netKg)}`;
+      document.getElementById("liveMarginBadge").textContent = `${s.margin}% Margin`;
+      document.getElementById("waPreview").textContent = buildWhatsAppText(s);
+    }
+
+    function copyCurrentReport() {
+      const text = document.getElementById("waPreview").textContent;
+      navigator.clipboard.writeText(text).then(() => showToast("WhatsApp Report Copied!"));
+    }
+
+    function shareWhatsApp() {
+      const text = encodeURIComponent(document.getElementById("waPreview").textContent);
+      window.open(`https://wa.me/?text=${text}`, "_blank");
+    }
+
+    function saveDailyRecord() {
+      if (isSaving) return;
+
+      const s = getFormState();
+      if (s.totalSales === 0 && s.totalExp === 0) {
+        showToast("Pehle Sales ya Expense bharein");
+        return;
+      }
+
+      isSaving = true;
+      const saveBtn = document.getElementById("saveSaleBtn");
+      saveBtn.disabled = true;
+      saveBtn.textContent = "Saving Live...";
+
+      const id = editingRecordId || makeDateId(s.date);
+      const existing = records.find((r) => r.id === id);
+
+      const payload = {
+        id,
+        date: s.date,
+        cash: s.cash,
+        upi: s.upi,
+        zomato: s.zomato,
+        swiggy: s.swiggy,
+        chickenSold: s.chickenSold,
+        chickenLeft: s.chickenLeft,
+        expenses: s.expenses,
+        createdAt: existing && existing.createdAt ? existing.createdAt : Date.now(),
+        updatedAt: Date.now()
+      };
+
+      activeRef
+        .child(id)
+        .set(payload)
+        .then(() => {
+          editingRecordId = null;
+          document.getElementById("editingBadge").classList.add("hidden");
+          clearForm(true);
+          showToast(existing ? "Date Record Updated!" : "New Sale Saved (1 Entry Only)!");
+          switchTab("hist");
+        })
+        .catch(() => {
+          showToast("Save Error! Firebase Rules check karein.");
+        })
+        .finally(() => {
+          setTimeout(() => {
+            isSaving = false;
+            saveBtn.disabled = false;
+            saveBtn.textContent = "Save New Sale (Live Sync)";
+          }, 700);
+        });
+    }
+
+    function clearForm(silent) {
+      editingRecordId = null;
+      document.getElementById("editingBadge").classList.add("hidden");
+      setTodayDate();
+      document.getElementById("inpCash").value = "";
+      document.getElementById("inpUpi").value = "";
+      document.getElementById("inpZomato").value = "";
+      document.getElementById("inpSwiggy").value = "";
+      document.getElementById("inpChickenSold").value = "";
+      document.getElementById("inpChickenLeft").value = "0";
+      currentExpenses = [];
+      renderExpenses();
+      updateLive();
+      if (!silent) showToast("Form Cleared");
+    }
+
+    function loadRecordToEdit(id) {
+      const rec = records.find((r) => r.id === id);
+      if (!rec) return;
+
+      editingRecordId = rec.id;
+      document.getElementById("editingBadge").classList.remove("hidden");
+      document.getElementById("inpDate").value = rec.date;
+      document.getElementById("inpCash").value = rec.cash || "";
+      document.getElementById("inpUpi").value = rec.upi || "";
+      document.getElementById("inpZomato").value = rec.zomato || "";
+      document.getElementById("inpSwiggy").value = rec.swiggy || "";
+      document.getElementById("inpChickenSold").value = rec.chickenSold || "";
+      document.getElementById("inpChickenLeft").value = rec.chickenLeft ?? 0;
+      currentExpenses = JSON.parse(JSON.stringify(rec.expenses || []));
+
+      renderExpenses();
+      updateLive();
+      switchTab("new");
+      showToast("Loaded for Editing");
+    }
+
+    function copySavedWA(id, fromDeleted) {
+      const list = fromDeleted ? deletedRecords : records;
+      const rec = list.find((r) => r.id === id);
+      if (!rec) return;
+      const totalSales = (rec.cash || 0) + (rec.upi || 0) + (rec.zomato || 0) + (rec.swiggy || 0);
+      const totalExp = (rec.expenses || []).reduce((a, b) => a + b.amount, 0);
+      const netProfit = totalSales - totalExp;
+      const avgKg = rec.chickenSold > 0 ? Math.round(totalSales / rec.chickenSold) : 0;
+
+      const text = buildWhatsAppText({
+        ...rec,
+        totalSales,
+        totalExp,
+        netProfit,
+        avgKg
+      });
+      navigator.clipboard.writeText(text).then(() => showToast("WhatsApp Report Copied!"));
+    }
+
+    function renderHistory() {
+      let totSales = 0;
+      let totExp = 0;
+      let totNet = 0;
+      let totCash = 0;
+      let totUpi = 0;
+      let totChicken = 0;
+
+      const container = document.getElementById("recordsContainer");
+
+      if (records.length === 0) {
+        container.innerHTML = `<div class="empty-box">Abhi koi active sale save nahi hai.<br/><strong>+ New Sale</strong> tab me jakar aaj ki report save karein.</div>`;
+      } else {
+        container.innerHTML = records
+          .map((rec) => {
+            const sales = (rec.cash || 0) + (rec.upi || 0) + (rec.zomato || 0) + (rec.swiggy || 0);
+            const exp = (rec.expenses || []).reduce((a, b) => a + b.amount, 0);
+            const net = sales - exp;
+            const margin = sales > 0 ? ((net / sales) * 100).toFixed(1) : "0.0";
+            const avgKg = rec.chickenSold > 0 ? Math.round(sales / rec.chickenSold) : 0;
+
+            totSales += sales;
+            totExp += exp;
+            totNet += net;
+            totCash += rec.cash || 0;
+            totUpi += rec.upi || 0;
+            totChicken += rec.chickenSold || 0;
+
+            return `
+              <div class="record-card">
+                <div class="record-head">
+                  <div>
+                    <div class="record-date">${rec.date}</div>
+                    <div class="record-sub">Chicken: ${rec.chickenSold} kg • Avg: ₹${fmtNum(avgKg)}/kg</div>
+                  </div>
+                  <span class="margin-pill">${margin}% Margin</span>
+                </div>
+
+                <div class="kpi-grid">
+                  <div class="kpi-box">
+                    <span>Sales</span>
+                    <strong class="text-green">₹${fmtNum(sales)}</strong>
+                  </div>
+                  <div class="kpi-box">
+                    <span>Expense</span>
+                    <strong class="text-red">₹${fmtNum(exp)}</strong>
+                  </div>
+                  <div class="kpi-box">
+                    <span>Net Profit</span>
+                    <strong class="text-yellow">₹${fmtNum(net)}</strong>
+                  </div>
+                </div>
+
+                <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);">
+                  <span>Cash: ₹${fmtNum(rec.cash)}</span>
+                  <span>UPI: ₹${fmtNum(rec.upi)}</span>
+                  <span>${(rec.expenses || []).length} expense items</span>
+                </div>
+
+                <div class="record-actions">
+                  <button class="btn-sm" onclick="loadRecordToEdit('${rec.id}')">Edit / Load</button>
+                  <button class="btn-sm yellow" onclick="copySavedWA('${rec.id}', false)">Copy WA</button>
+                  <button class="btn-sm danger" onclick="requestSecurity('move_to_trash', '${rec.id}')">Delete</button>
+                </div>
+              </div>
+            `;
+          })
+          .join("");
+      }
+
+      const partnerShare = totNet / 4;
+      const overallAvgKg = totChicken > 0 ? Math.round(totSales / totChicken) : 0;
+
+      document.getElementById("histDaysCount").textContent = `${records.length} Days`;
+      document.getElementById("totSales").textContent = `₹${fmtNum(totSales)}`;
+      document.getElementById("totExp").textContent = `₹${fmtNum(totExp)}`;
+      document.getElementById("totNet").textContent = `₹${fmtNum(totNet)}`;
+      document.getElementById("totCash").textContent = `₹${fmtNum(totCash)}`;
+      document.getElementById("totUpi").textContent = `₹${fmtNum(totUpi)}`;
+      document.getElementById("partnerEach").textContent = `₹${partnerShare.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
+      document.getElementById("totChicken").textContent = `${totChicken} kg`;
+      document.getElementById("totAvgKg").textContent = `₹${fmtNum(overallAvgKg)}`;
+    }
+
+    function renderDeleted() {
+      const container = document.getElementById("deletedContainer");
+      document.getElementById("delDaysCount").textContent = `${deletedRecords.length} Saved`;
+
+      if (deletedRecords.length === 0) {
+        container.innerHTML = `<div class="empty-box">Delete folder khali hai.<br/>Jab aap kisi record ko <strong>Delete</strong> karenge, wo yahan save ho jayega.</div>`;
+        return;
+      }
+
+      container.innerHTML = deletedRecords
+        .map((rec) => {
+          const sales = (rec.cash || 0) + (rec.upi || 0) + (rec.zomato || 0) + (rec.swiggy || 0);
+          const exp = (rec.expenses || []).reduce((a, b) => a + b.amount, 0);
+          const net = sales - exp;
+          const delTime = rec.deletedAt
+            ? new Date(rec.deletedAt).toLocaleString("en-IN", {
+                day: "2-digit",
+                month: "short",
+                hour: "2-digit",
+                minute: "2-digit"
+              })
+            : "Deleted";
+
+          return `
+            <div class="record-card deleted-item">
+              <div class="record-head">
+                <div>
+                  <div class="record-date">${rec.date}</div>
+                  <div class="record-sub">Chicken: ${rec.chickenSold} kg • Deleted: ${delTime}</div>
+                </div>
+                <span class="deleted-pill">In Delete Folder</span>
+              </div>
+
+              <div class="kpi-grid">
+                <div class="kpi-box">
+                  <span>Sales</span>
+                  <strong class="text-green">₹${fmtNum(sales)}</strong>
+                </div>
+                <div class="kpi-box">
+                  <span>Expense</span>
+                  <strong class="text-red">₹${fmtNum(exp)}</strong>
+                </div>
+                <div class="kpi-box">
+                  <span>Net Profit</span>
+                  <strong class="text-yellow">₹${fmtNum(net)}</strong>
+                </div>
+              </div>
+
+              <div class="record-actions">
+                <button class="btn-sm green" onclick="restoreFromTrash('${rec.id}')">Restore</button>
+                <button class="btn-sm yellow" onclick="copySavedWA('${rec.id}', true)">Copy WA</button>
+                <button class="btn-sm danger" onclick="requestSecurity('perm_delete', '${rec.id}')">Remove</button>
+              </div>
+            </div>
+          `;
+        })
+        .join("");
+    }
+
+    function restoreFromTrash(id) {
+      const rec = deletedRecords.find((r) => r.id === id);
+      if (!rec) return;
+
+      const cleanId = makeDateId(rec.date);
+      const cleanRec = { ...rec, id: cleanId };
+      delete cleanRec.deletedAt;
+
+      activeRef
+        .child(cleanId)
+        .set(cleanRec)
+        .then(() => deletedRef.child(id).remove())
+        .then(() => {
+          showToast("Restored to Saved Sales!");
+          switchTab("hist");
+        })
+        .catch(() => showToast("Restore Error!"));
+    }
+
+    function requestSecurity(type, id) {
+      pendingSecurityAction = { type, id };
+      document.getElementById("secPhone").value = "";
+      document.getElementById("secPass").value = "";
+      document.getElementById("secError").textContent = "";
+
+      if (type === "move_to_trash") {
+        document.getElementById("modalTitleText").textContent = "Delete & Move to Delete Folder";
+        document.getElementById("modalActionDesc").textContent =
+          "Ye record Saved hisab se hat kar Delete folder me save ho jayega. Number aur password dalein:";
+        document.getElementById("secConfirmBtn").textContent = "Verify & Delete";
+      } else if (type === "move_all_to_trash") {
+        document.getElementById("modalTitleText").textContent = "Delete All Saved Records";
+        document.getElementById("modalActionDesc").textContent =
+          "Saare records hat kar Delete folder me save ho jayenge. Number aur password dalein:";
+        document.getElementById("secConfirmBtn").textContent = "Delete All to Folder";
+      } else if (type === "perm_delete") {
+        document.getElementById("modalTitleText").textContent = "Permanent Remove";
+        document.getElementById("modalActionDesc").textContent =
+          "Delete folder se hamesha ke liye hatane ke liye number aur password dalein:";
+        document.getElementById("secConfirmBtn").textContent = "Remove Permanently";
+      }
+
+      document.getElementById("securityModal").classList.add("open");
+    }
+
+    function closeSecurityModal() {
+      document.getElementById("securityModal").classList.remove("open");
+      pendingSecurityAction = { type: null, id: null };
+    }
+
+    function confirmSecurityAction() {
+      const phone = normalizeDigits(document.getElementById("secPhone").value);
+      const pass = normalizePass(document.getElementById("secPass").value);
+
+      if (phone !== AUTH_PHONE || pass !== AUTH_PASS) {
+        document.getElementById("secError").textContent = "Galat Number ya Password! Cancel kiya gaya.";
+        return;
+      }
+
+      const actionType = pendingSecurityAction.type;
+      const targetId = pendingSecurityAction.id;
+      closeSecurityModal();
+
+      if (actionType === "move_to_trash" && targetId) {
+        const rec = records.find((r) => r.id === targetId);
+        if (!rec) return;
+        const trashKey = "del_" + Date.now() + "_" + targetId;
+        const trashPayload = { ...rec, id: trashKey, deletedAt: Date.now() };
+        deletedRef
+          .child(trashKey)
+          .set(trashPayload)
+          .then(() => activeRef.child(targetId).remove())
+          .then(() => showToast("Deleted! Saved in Delete Tab."))
+          .catch(() => showToast("Delete Error! Firebase Rules check karein."));
+      } else if (actionType === "move_all_to_trash") {
+        const batchTrash = {};
+        const now = Date.now();
+        records.forEach((r, i) => {
+          const trashKey = "del_" + (now + i) + "_" + r.id;
+          batchTrash[trashKey] = { ...r, id: trashKey, deletedAt: now + i };
+        });
+        deletedRef
+          .update(batchTrash)
+          .then(() => activeRef.remove())
+          .then(() => showToast("All Records Moved to Delete Folder!"))
+          .catch(() => showToast("Delete All Error!"));
+      } else if (actionType === "perm_delete" && targetId) {
+        deletedRef
+          .child(targetId)
+          .remove()
+          .then(() => showToast("Removed from Delete Folder!"))
+          .catch(() => showToast("Remove Error!"));
+      }
+    }
+
+    setTodayDate();
+    renderExpenses();
+    updateLive();
+
+    if (localStorage.getItem(SESSION_KEY) === "true") {
+      openAppAfterLogin();
+    }
+  </script>
+</body>
+</html>
